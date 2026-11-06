@@ -1,0 +1,256 @@
+
+<div class="users-page">
+  <div class="page-heading">
+    <div>
+      <span class="section-label">ADMINISTRACIÓN</span>
+      <h1>Usuarios</h1>
+      <p>Gestiona las cuentas y permisos de acceso al sistema.</p>
+    </div>
+
+    <button class="primary-button" type="button" (click)="openCreateForm()">
+      <span>＋</span>
+      Nuevo usuario
+    </button>
+  </div>
+
+  <div class="feedback-message error" *ngIf="errorMessage">
+    {{ errorMessage }}
+  </div>
+
+  <div class="feedback-message success" *ngIf="successMessage">
+    {{ successMessage }}
+  </div>
+
+  <section class="users-card">
+    <div class="table-toolbar">
+      <div class="search-box">
+        <span>⌕</span>
+        <input
+          type="text"
+          placeholder="Buscar por nombre o correo electrónico..."
+          [(ngModel)]="searchTerm"
+        />
+      </div>
+
+      <select [(ngModel)]="statusFilter" class="status-filter">
+        <option value="ALL">Todos los usuarios</option>
+        <option value="ACTIVE">Activos</option>
+        <option value="INACTIVE">Inactivos</option>
+      </select>
+    </div>
+
+    <div class="table-container">
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th>USUARIO</th>
+            <th>CORREO ELECTRÓNICO</th>
+            <th>ROL</th>
+            <th>FECHA DE REGISTRO</th>
+            <th>ESTADO</th>
+            <th class="actions-column">ACCIONES</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngIf="loading">
+            <td colspan="6" class="empty-state">
+              Cargando usuarios...
+            </td>
+          </tr>
+
+          <tr *ngFor="let user of filteredUsers">
+            <td>
+              <div class="user-info">
+                <div class="user-avatar">
+                  {{ user.fullName.charAt(0).toUpperCase() }}
+                </div>
+                <span>{{ user.fullName }}</span>
+              </div>
+            </td>
+
+            <td>{{ user.username }}</td>
+
+            <td>
+              <span
+                class="role-badge"
+                [class.admin]="user.role === 'ADMIN'"
+                [class.operator]="user.role === 'OPERADOR'"
+              >
+                {{ user.role === 'ADMIN' ? 'Administrador' : 'Operador' }}
+              </span>
+            </td>
+
+            <td>
+              {{ user.createdAt ? (user.createdAt | date:'dd/MM/yyyy') : '—' }}
+            </td>
+
+            <td>
+              <span
+                class="status-badge"
+                [class.active]="user.isActive"
+                [class.inactive]="!user.isActive"
+              >
+                {{ user.isActive ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+
+            <td class="actions-column">
+              <div class="table-actions">
+                <button
+                  type="button"
+                  class="action-button edit"
+                  title="Editar usuario"
+                  (click)="openEditForm(user)"
+                >
+                  ✎
+                </button>
+
+                <button
+                  type="button"
+                  class="action-button"
+                  [class.activate]="!user.isActive"
+                  [class.deactivate]="user.isActive"
+                  [title]="user.isActive ? 'Desactivar usuario' : 'Activar usuario'"
+                  (click)="toggleStatus(user)"
+                >
+                  {{ user.isActive ? '⏻' : '✓' }}
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="!loading && filteredUsers.length === 0">
+            <td colspan="6" class="empty-state">
+              No se encontraron usuarios.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer" *ngIf="!loading">
+      <span>
+        {{ filteredUsers.length }}
+        {{ filteredUsers.length === 1 ? 'usuario encontrado' : 'usuarios encontrados' }}
+      </span>
+    </div>
+  </section>
+
+  <!-- Modal de creación y edición -->
+  <div class="modal-overlay" *ngIf="showForm" (click)="closeForm()">
+    <div
+      class="modal-container"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal-header">
+        <div>
+          <span class="section-label">GESTIÓN DE CUENTAS</span>
+          <h2>{{ editingId ? 'Editar usuario' : 'Nuevo usuario' }}</h2>
+          <p>
+            {{ editingId
+              ? 'Actualiza la información y los permisos de la cuenta.'
+              : 'Registra un nuevo usuario para acceder al sistema.' }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="close-button"
+          (click)="closeForm()"
+          [disabled]="saving"
+        >
+          ×
+        </button>
+      </div>
+
+      <form (ngSubmit)="saveUser()" #userForm="ngForm">
+        <div class="form-group">
+          <label for="fullName">Nombre completo *</label>
+          <input
+            id="fullName"
+            type="text"
+            name="fullName"
+            [(ngModel)]="form.fullName"
+            placeholder="Ej. Carlos Ramírez"
+            required
+            maxlength="100"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="username">Correo electrónico *</label>
+          <input
+            id="username"
+            type="email"
+            name="username"
+            [(ngModel)]="form.username"
+            placeholder="usuario@correo.com"
+            required
+            email
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="password">
+            Contraseña {{ editingId ? '(opcional)' : '*' }}
+          </label>
+          <input
+            id="password"
+            type="password"
+            name="password"
+            [(ngModel)]="form.password"
+            [placeholder]="editingId ? 'Dejar vacío para conservar la actual' : 'Mínimo 8 caracteres'"
+            [required]="!editingId"
+            minlength="8"
+            autocomplete="new-password"
+          />
+          <small *ngIf="editingId">
+            Si no deseas cambiar la contraseña, deja este campo vacío.
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label for="role">Rol del usuario *</label>
+          <select
+            id="role"
+            name="role"
+            [(ngModel)]="form.role"
+            required
+          >
+            <option value="OPERADOR">Operador</option>
+            <option value="ADMIN">Administrador</option>
+          </select>
+          <small>
+            El administrador puede gestionar usuarios y configuraciones.
+          </small>
+        </div>
+
+        <div class="feedback-message error" *ngIf="errorMessage">
+          {{ errorMessage }}
+        </div>
+
+        <div class="modal-actions">
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="closeForm()"
+            [disabled]="saving"
+          >
+            Cancelar
+          </button>
+
+          <button
+            type="submit"
+            class="primary-button"
+            [disabled]="saving || userForm.invalid"
+          >
+            {{ saving
+              ? 'Guardando...'
+              : editingId ? 'Guardar cambios' : 'Crear usuario' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

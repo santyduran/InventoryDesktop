@@ -1,0 +1,82 @@
+
+import { isPlatformBrowser } from '@angular/common';
+import { Component, inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+
+import { AuthService } from '../../../core/services/auth.service';
+
+@Component({
+  selector: 'app-login',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './login.html',
+  styleUrl: './login.scss',
+})
+export class Login implements OnInit {
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly platformId = inject(PLATFORM_ID);
+
+  username = '';
+  password = '';
+  showPassword = false;
+  loading = false;
+  errorMessage = '';
+  successMessage = '';
+
+  ngOnInit(): void {
+    // La consulta solo debe ejecutarse en el navegador.
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    this.authService.getSetupStatus().subscribe({
+      next: (status) => {
+        if (status.requiresSetup) {
+          this.router.navigate(['/setup']);
+        }
+      },
+      error: () => {
+        // Si el backend no responde, se conserva el login.
+        // El error de conexión se mostrará al intentar ingresar.
+      },
+    });
+  }
+
+  onSubmit(): void {
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    const username = this.username.trim().toLowerCase();
+    const password = this.password;
+
+    if (!username || !password) {
+      this.errorMessage = 'Ingresa tu correo y contraseña.';
+      return;
+    }
+
+    this.loading = true;
+
+    this.authService.login(username, password).subscribe({
+      next: () => {
+        this.loading = false;
+        this.router.navigate(['/dashboard']);
+      },
+      error: (error) => {
+        this.loading = false;
+
+        if (error.status === 401) {
+          this.errorMessage = 'Correo o contraseña incorrectos.';
+        } else if (error.status === 0) {
+          this.errorMessage =
+            'No se pudo conectar con el servidor. Verifica que el backend esté activo.';
+        } else {
+          this.errorMessage =
+            error.error?.message || 'Ocurrió un error al iniciar sesión.';
+        }
+      },
+    });
+  }
+}

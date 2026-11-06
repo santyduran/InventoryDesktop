@@ -1,0 +1,290 @@
+
+<div class="movements-page">
+  <div class="page-heading">
+    <div>
+      <span class="section-label">GESTIÓN DE INVENTARIO</span>
+      <h2>Movimientos de inventario</h2>
+      <p>Controla las entradas, salidas y existencias de tus productos.</p>
+    </div>
+
+    <button
+      type="button"
+      class="primary-button"
+      (click)="openForm()"
+    >
+      <span class="button-icon">+</span>
+      Nuevo movimiento
+    </button>
+  </div>
+
+  <div *ngIf="errorMessage" class="feedback error-feedback">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="successMessage" class="feedback success-feedback">
+    {{ successMessage }}
+  </div>
+
+  <div class="movements-card">
+    <div class="table-toolbar">
+      <div class="toolbar-title">
+        <h3>Historial de movimientos</h3>
+        <span>{{ filteredMovements.length }} registros</span>
+      </div>
+
+      <div class="toolbar-filters">
+        <div class="search-box">
+          <span>⌕</span>
+          <input
+            type="text"
+            placeholder="Buscar por producto o responsable..."
+            [(ngModel)]="searchTerm"
+          />
+        </div>
+
+        <select
+          class="status-filter"
+          [(ngModel)]="movementFilter"
+        >
+          <option value="ALL">Todos los movimientos</option>
+          <option value="ENTRY">Entradas</option>
+          <option value="EXIT">Salidas</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table class="movements-table">
+        <thead>
+          <tr>
+            <th>FECHA</th>
+            <th>PRODUCTO</th>
+            <th>TIPO</th>
+            <th>CANTIDAD</th>
+            <th>STOCK ANTERIOR</th>
+            <th>STOCK RESULTANTE</th>
+            <th>RESPONSABLE</th>
+            <th>OBSERVACIONES</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngIf="loading">
+            <td colspan="8" class="table-message">
+              Cargando movimientos...
+            </td>
+          </tr>
+
+          <tr *ngIf="!loading && filteredMovements.length === 0">
+            <td colspan="8" class="table-message">
+              No se encontraron movimientos de inventario.
+            </td>
+          </tr>
+
+          <tr *ngFor="let movement of filteredMovements">
+            <td>{{ formatDate(movement.createdAt) }}</td>
+
+            <td>
+              <div class="product-information">
+                <strong>{{ movement.product?.name || 'Producto no disponible' }}</strong>
+                <small>{{ movement.product?.code || '—' }}</small>
+              </div>
+            </td>
+
+            <td>
+              <span
+                class="movement-badge"
+                [class.entry-badge]="movement.movementType === 'ENTRY'"
+                [class.exit-badge]="movement.movementType === 'EXIT'"
+              >
+                {{ movement.movementType === 'ENTRY' ? 'Entrada' : 'Salida' }}
+              </span>
+            </td>
+
+            <td>
+              <strong
+                [class.entry-quantity]="movement.movementType === 'ENTRY'"
+                [class.exit-quantity]="movement.movementType === 'EXIT'"
+              >
+                {{ movement.movementType === 'ENTRY' ? '+' : '-' }}{{ movement.quantity }}
+              </strong>
+            </td>
+
+            <td>{{ movement.stockBefore }}</td>
+            <td>{{ movement.stockAfter }}</td>
+            <td>{{ movement.user?.fullName || '—' }}</td>
+            <td class="observations-cell">
+              {{ movement.observations || '—' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer">
+      <span>
+        Mostrando {{ filteredMovements.length }} de {{ movements.length }} movimientos
+      </span>
+
+      <button
+        type="button"
+        class="refresh-button"
+        (click)="loadMovements()"
+      >
+        ↻ Actualizar
+      </button>
+    </div>
+  </div>
+
+  <div
+    class="modal-overlay"
+    *ngIf="showForm"
+    (click)="closeForm()"
+  >
+    <div
+      class="movement-modal"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal-header">
+        <div>
+          <span class="section-label">CONTROL DE EXISTENCIAS</span>
+          <h3>Registrar movimiento</h3>
+          <p>Registra una entrada o salida de inventario.</p>
+        </div>
+
+        <button
+          type="button"
+          class="close-button"
+          (click)="closeForm()"
+        >
+          ×
+        </button>
+      </div>
+
+      <form (ngSubmit)="saveMovement()">
+        <div class="form-grid">
+          <div class="form-field full-width">
+            <label>Tipo de movimiento *</label>
+
+            <div class="movement-type-selector">
+              <label
+                class="movement-type-option"
+                [class.selected-entry]="form.movementType === 'ENTRY'"
+              >
+                <input
+                  type="radio"
+                  name="movementType"
+                  value="ENTRY"
+                  [(ngModel)]="form.movementType"
+                />
+                <span class="type-symbol">↓</span>
+                <span>Entrada de inventario</span>
+              </label>
+
+              <label
+                class="movement-type-option"
+                [class.selected-exit]="form.movementType === 'EXIT'"
+              >
+                <input
+                  type="radio"
+                  name="movementType"
+                  value="EXIT"
+                  [(ngModel)]="form.movementType"
+                />
+                <span class="type-symbol">↑</span>
+                <span>Salida de inventario</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-field full-width">
+            <label>Producto *</label>
+
+            <select
+              name="productId"
+              [(ngModel)]="form.productId"
+              required
+            >
+              <option value="">Selecciona un producto</option>
+
+              <option
+                *ngFor="let product of activeProducts"
+                [value]="product.id"
+              >
+                {{ product.code }} - {{ product.name }} (Stock: {{ product.stock }})
+              </option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label>Cantidad *</label>
+            <input
+              type="number"
+              name="quantity"
+              [(ngModel)]="form.quantity"
+              min="1"
+              step="1"
+              required
+            />
+          </div>
+
+          <div class="form-field">
+            <label>Stock actual</label>
+            <input
+              type="text"
+              [value]="selectedProduct ? selectedProduct.stock : 'Selecciona un producto'"
+              readonly
+            />
+          </div>
+
+          <div class="stock-preview full-width" *ngIf="resultingStock !== null">
+            <div>
+              <span>Stock después del movimiento</span>
+              <strong>{{ resultingStock }}</strong>
+            </div>
+
+            <span
+              *ngIf="resultingStock < 0"
+              class="stock-warning"
+            >
+              Existencias insuficientes
+            </span>
+          </div>
+
+          <div class="form-field full-width">
+            <label>Observaciones</label>
+            <textarea
+              name="observations"
+              [(ngModel)]="form.observations"
+              rows="3"
+              placeholder="Motivo o detalle del movimiento..."
+            ></textarea>
+          </div>
+        </div>
+
+        <div *ngIf="errorMessage" class="feedback error-feedback">
+          {{ errorMessage }}
+        </div>
+
+        <div class="modal-actions">
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="closeForm()"
+            [disabled]="saving"
+          >
+            Cancelar
+          </button>
+
+          <button
+            type="submit"
+            class="primary-button"
+            [disabled]="saving || activeProducts.length === 0"
+          >
+            {{ saving ? 'Guardando...' : 'Registrar movimiento' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

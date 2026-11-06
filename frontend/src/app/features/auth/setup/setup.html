@@ -1,0 +1,317 @@
+
+<div class="setup-page">
+  <div class="setup-background"></div>
+
+  <main class="setup-container">
+    <section class="setup-card">
+
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d="M14.7 6.3a5 5 0 0 0-6.4 6.4L3 18l3 3 5.3-5.3a5 5 0 0 0 6.4-6.4l-3.1 3.1-3-3 3.1-3.1Z"
+              stroke="currentColor"
+              stroke-width="1.7"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </div>
+
+        <div>
+          <h1>Inventory<span>Desktop</span></h1>
+          <p>CONFIGURACIÓN INICIAL</p>
+        </div>
+      </div>
+
+      <div class="welcome">
+        <span class="welcome-label">PRIMEROS PASOS</span>
+        <h2>Crear administrador</h2>
+        <p>
+          Registra la cuenta principal para comenzar a gestionar
+          el inventario de tu taller.
+        </p>
+      </div>
+
+      <form
+        *ngIf="!completed"
+        (ngSubmit)="onSubmit()"
+        #setupForm="ngForm"
+      >
+
+        <div class="form-group">
+          <label for="fullName">Nombre completo</label>
+
+          <div class="input-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle
+                cx="12"
+                cy="8"
+                r="4"
+                stroke="currentColor"
+                stroke-width="1.7"
+              />
+              <path
+                d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+              />
+            </svg>
+
+            <input
+              id="fullName"
+              type="text"
+              name="fullName"
+              [(ngModel)]="fullName"
+              placeholder="Ingresa tu nombre completo"
+              autocomplete="name"
+              maxlength="100"
+              required
+              [disabled]="loading"
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="username">Correo electrónico</label>
+
+          <div class="input-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect
+                x="3"
+                y="5"
+                width="18"
+                height="14"
+                rx="2"
+                stroke="currentColor"
+                stroke-width="1.7"
+              />
+              <path
+                d="m3 7 9 6 9-6"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+
+            <input
+              id="username"
+              type="email"
+              name="username"
+              [(ngModel)]="username"
+              placeholder="nombre@correo.com"
+              autocomplete="email"
+              maxlength="50"
+              required
+              email
+              [disabled]="loading"
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Contraseña</label>
+
+          <div class="input-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect
+                x="4"
+                y="10"
+                width="16"
+                height="11"
+                rx="2"
+                stroke="currentColor"
+                stroke-width="1.7"
+              />
+              <path
+                d="M8 10V7a4 4 0 0 1 8 0v3"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+              />
+              <circle cx="12" cy="15" r="1" fill="currentColor" />
+            </svg>
+
+            <input
+              id="password"
+              [type]="showPassword ? 'text' : 'password'"
+              name="password"
+              [(ngModel)]="password"
+              placeholder="Mínimo 12 caracteres"
+              autocomplete="new-password"
+              minlength="12"
+              maxlength="128"
+              required
+              [disabled]="loading"
+            />
+
+            <button
+              type="button"
+              class="password-toggle"
+              (click)="showPassword = !showPassword"
+              [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            >
+              {{ showPassword ? 'Ocultar' : 'Mostrar' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Confirmar contraseña</label>
+
+          <div class="input-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect
+                x="4"
+                y="10"
+                width="16"
+                height="11"
+                rx="2"
+                stroke="currentColor"
+                stroke-width="1.7"
+              />
+              <path
+                d="M8 10V7a4 4 0 0 1 8 0v3"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+              />
+              <circle cx="12" cy="15" r="1" fill="currentColor" />
+            </svg>
+
+            <input
+              id="confirmPassword"
+              [type]="showConfirmPassword ? 'text' : 'password'"
+              name="confirmPassword"
+              [(ngModel)]="confirmPassword"
+              placeholder="Repite tu contraseña"
+              autocomplete="new-password"
+              required
+              [disabled]="loading"
+            />
+
+            <button
+              type="button"
+              class="password-toggle"
+              (click)="showConfirmPassword = !showConfirmPassword"
+              [attr.aria-label]="showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            >
+              {{ showConfirmPassword ? 'Ocultar' : 'Mostrar' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="role-note">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6l-7-3Z"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linejoin="round"
+            />
+            <path
+              d="m9 12 2 2 4-4"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+
+          <div>
+            <strong>Administrador principal</strong>
+            <span>El rol ADMIN se asignará automáticamente.</span>
+          </div>
+        </div>
+
+        <div class="error-message" *ngIf="errorMessage">
+          <span>!</span>
+          {{ errorMessage }}
+        </div>
+
+        <button
+          class="setup-button"
+          type="submit"
+          [disabled]="loading || setupForm.invalid"
+        >
+          <span *ngIf="!loading">Crear administrador</span>
+          <span *ngIf="loading">Creando cuenta...</span>
+
+          <svg
+            *ngIf="!loading"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M5 12h14m-6-6 6 6-6 6"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+
+      </form>
+
+      <div class="setup-completed" *ngIf="completed">
+        <div class="completed-icon">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d="m5 12 5 5L20 7"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </div>
+
+        <h3>¡Cuenta creada correctamente!</h3>
+
+        <p>{{ successMessage }}</p>
+
+        <a routerLink="/login" class="setup-button">
+          Ir al inicio de sesión
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d="M5 12h14m-6-6 6 6-6 6"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </a>
+      </div>
+
+      <div class="security-note">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path
+            d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6l-7-3Z"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linejoin="round"
+          />
+          <path
+            d="m9 12 2 2 4-4"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+
+        Configuración segura de InventoryDesktop
+      </div>
+
+    </section>
+
+    <footer>
+      InventoryDesktop · Sistema de gestión de inventario
+    </footer>
+  </main>
+</div>

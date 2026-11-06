@@ -1,0 +1,103 @@
+
+<section class="dashboard-content">
+
+  <div class="welcome-section">
+    <div>
+      <span class="section-label">RESUMEN GENERAL</span>
+      <h2>Bienvenido a InventoryDesktop</h2>
+      <p>
+        Administra los productos y controla los movimientos
+        de inventario de tu taller.
+      </p>
+    </div>
+  </div>
+
+  <div class="section-heading">
+    <div>
+      <h3>Indicadores del inventario</h3>
+      <p>Información general de tu operación.</p>
+    </div>
+  </div>
+
+  <div class="indicators-grid">
+
+    <article class="indicator-card">
+      <div class="indicator-top">
+        <span class="indicator-icon products-icon">▣</span>
+        <span class="indicator-status">Pendiente</span>
+      </div>
+      <span class="indicator-title">Total de productos</span>
+      <strong class="indicator-value">—</strong>
+      <span class="indicator-description">Datos pendientes de conexión</span>
+    </article>
+
+    <article class="indicator-card">
+      <div class="indicator-top">
+        <span class="indicator-icon stock-icon">▤</span>
+        <span class="indicator-status">Pendiente</span>
+      </div>
+      <span class="indicator-title">Stock bajo</span>
+      <strong class="indicator-value">—</strong>
+      <span class="indicator-description">Productos por debajo del mínimo</span>
+    </article>
+
+    <article class="indicator-card">
+      <div class="indicator-top">
+        <span class="indicator-icon entries-icon">↓</span>
+        <span class="indicator-status">Pendiente</span>
+      </div>
+      <span class="indicator-title">Entradas de inventario</span>
+      <strong class="indicator-value">—</strong>
+      <span class="indicator-description">Movimientos de entrada</span>
+    </article>
+
+    <article class="indicator-card">
+      <div class="indicator-top">
+        <span class="indicator-icon exits-icon">↑</span>
+        <span class="indicator-status">Pendiente</span>
+      </div>
+      <span class="indicator-title">Salidas de inventario</span>
+      <strong class="indicator-value">—</strong>
+      <span class="indicator-description">Movimientos de salida</span>
+    </article>
+
+  </div>
+
+  <section class="activity-card">
+    <div class="activity-heading">
+      <div>
+        <h3>Actividad reciente</h3>
+        <p>Últimos movimientos registrados en el inventario.</p>
+      </div>
+
+      <span class="pending-label">Pendiente de conexión</span>
+    </div>
+
+    <div class="empty-state">
+      <div class="empty-icon">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path
+            d="M8 6h13M8 12h13M8 18h13"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+          />
+          <circle cx="3" cy="6" r="1" fill="currentColor"/>
+          <circle cx="3" cy="12" r="1" fill="currentColor"/>
+          <circle cx="3" cy="18" r="1" fill="currentColor"/>
+        </svg>
+      </div>
+
+      <h4>Sin movimientos para mostrar</h4>
+      <p>
+        Cuando se registren entradas o salidas,
+        aparecerán aquí.
+      </p>
+    </div>
+  </section>
+
+  <footer class="dashboard-footer">
+    InventoryDesktop · Sistema de gestión de inventario
+  </footer>
+
+</section>

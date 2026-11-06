@@ -1,0 +1,414 @@
+
+<div class="products-page">
+
+  <div class="page-heading">
+    <div>
+      <span class="section-label">GESTIÓN DE INVENTARIO</span>
+      <h2>Productos</h2>
+      <p>Administra los repuestos y productos de tu taller.</p>
+    </div>
+
+    <button
+      *ngIf="isAdmin"
+      type="button"
+      class="primary-button"
+      (click)="openCreateForm()"
+    >
+      <span class="button-icon">+</span>
+      Nuevo producto
+    </button>
+  </div>
+
+  <div class="feedback error-feedback" *ngIf="errorMessage">
+    <span>!</span>
+    {{ errorMessage }}
+  </div>
+
+  <div class="feedback success-feedback" *ngIf="successMessage">
+    <span>✓</span>
+    {{ successMessage }}
+  </div>
+
+  <section class="products-card">
+
+    <div class="table-toolbar">
+      <div class="toolbar-title">
+        <h3>Listado de productos</h3>
+        <span>{{ filteredProducts.length }} registros</span>
+      </div>
+
+      <div class="toolbar-filters">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle
+              cx="11"
+              cy="11"
+              r="7"
+              stroke="currentColor"
+              stroke-width="1.7"
+            />
+            <path
+              d="m16 16 4 4"
+              stroke="currentColor"
+              stroke-width="1.7"
+              stroke-linecap="round"
+            />
+          </svg>
+
+          <input
+            type="search"
+            [(ngModel)]="searchTerm"
+            placeholder="Buscar por código, nombre o categoría..."
+          />
+        </div>
+
+        <select
+          class="status-filter"
+          [(ngModel)]="statusFilter"
+          aria-label="Filtrar por estado"
+        >
+          <option value="ALL">Todos los estados</option>
+          <option value="ACTIVE">Activos</option>
+          <option value="INACTIVE">Inactivos</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table class="products-table">
+        <thead>
+          <tr>
+            <th>PRODUCTO</th>
+            <th>CATEGORÍA</th>
+            <th>PRECIO COMPRA</th>
+            <th>PRECIO VENTA</th>
+            <th>EXISTENCIAS</th>
+            <th>ESTADO</th>
+            <th *ngIf="isAdmin">ACCIONES</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngIf="loading">
+            <td [attr.colspan]="isAdmin ? 7 : 6" class="table-message">
+              Cargando productos...
+            </td>
+          </tr>
+
+          <tr *ngIf="!loading && filteredProducts.length === 0">
+            <td [attr.colspan]="isAdmin ? 7 : 6" class="table-message">
+              No se encontraron productos.
+            </td>
+          </tr>
+
+          <tr *ngFor="let product of filteredProducts">
+            <td>
+              <div class="product-information">
+                <span class="product-code">{{ product.code }}</span>
+                <strong>{{ product.name }}</strong>
+                <small *ngIf="product.barcode">
+                  Código de barras: {{ product.barcode }}
+                </small>
+              </div>
+            </td>
+
+            <td>
+              <span class="category-name">
+                {{ product.category?.name || 'Sin categoría' }}
+              </span>
+            </td>
+
+            <td class="price-cell">
+              {{ formatCurrency(product.purchasePrice) }}
+            </td>
+
+            <td class="price-cell">
+              {{ formatCurrency(product.salePrice) }}
+            </td>
+
+            <td>
+              <div class="stock-information">
+                <strong
+                  [class.low-stock]="product.stock <= product.minimumStock"
+                >
+                  {{ product.stock }}
+                </strong>
+
+                <small>
+                  Mínimo: {{ product.minimumStock }}
+                </small>
+              </div>
+            </td>
+
+            <td>
+              <span
+                class="status-badge"
+                [class.status-active]="product.isActive"
+                [class.status-inactive]="!product.isActive"
+              >
+                {{ product.isActive ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+
+            <td *ngIf="isAdmin">
+              <div class="action-buttons">
+                <button
+                  type="button"
+                  class="action-button edit-button"
+                  title="Editar producto"
+                  (click)="openEditForm(product)"
+                >
+                  Editar
+                </button>
+
+                <button
+                  type="button"
+                  class="action-button"
+                  [class.activate-button]="!product.isActive"
+                  [class.deactivate-button]="product.isActive"
+                  (click)="toggleProductStatus(product)"
+                >
+                  {{ product.isActive ? 'Desactivar' : 'Activar' }}
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer">
+      <span>
+        Mostrando {{ filteredProducts.length }} de
+        {{ products.length }} productos
+      </span>
+
+      <button
+        type="button"
+        class="refresh-button"
+        (click)="loadProducts()"
+        [disabled]="loading"
+      >
+        ↻ Actualizar
+      </button>
+    </div>
+
+  </section>
+
+  <div class="modal-overlay" *ngIf="showForm" (click)="closeForm()">
+    <section
+      class="product-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="product-modal-title"
+      (click)="$event.stopPropagation()"
+    >
+
+      <div class="modal-header">
+        <div>
+          <span class="section-label">INVENTARIO</span>
+          <h3 id="product-modal-title">
+            {{ editingProductId ? 'Editar producto' : 'Nuevo producto' }}
+          </h3>
+          <p>
+            Completa la información del producto.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="close-button"
+          (click)="closeForm()"
+          [disabled]="saving"
+          aria-label="Cerrar"
+        >
+          ×
+        </button>
+      </div>
+
+      <form #productForm="ngForm" (ngSubmit)="saveProduct()">
+
+        <div class="form-grid">
+
+          <div class="form-field">
+            <label for="code">Código *</label>
+            <input
+              id="code"
+              name="code"
+              type="text"
+              [(ngModel)]="form.code"
+              placeholder="Ej. REP-002"
+              required
+              [disabled]="saving"
+            />
+          </div>
+
+          <div class="form-field">
+            <label for="barcode">Código de barras</label>
+            <input
+              id="barcode"
+              name="barcode"
+              type="text"
+              [(ngModel)]="form.barcode"
+              placeholder="Código de barras"
+              [disabled]="saving"
+            />
+          </div>
+
+          <div class="form-field full-width">
+            <label for="name">Nombre del producto *</label>
+            <input
+              id="name"
+              name="name"
+              type="text"
+              [(ngModel)]="form.name"
+              placeholder="Ej. Banda de distribución"
+              required
+              [disabled]="saving"
+            />
+          </div>
+
+          <div class="form-field full-width">
+            <label for="description">Descripción</label>
+            <textarea
+              id="description"
+              name="description"
+              [(ngModel)]="form.description"
+              placeholder="Descripción del producto"
+              rows="3"
+              [disabled]="saving"
+            ></textarea>
+          </div>
+
+          <div class="form-field full-width">
+            <label for="categoryId">Categoría *</label>
+            <select
+              id="categoryId"
+              name="categoryId"
+              [(ngModel)]="form.categoryId"
+              required
+              [disabled]="saving"
+            >
+              <option value="">Selecciona una categoría</option>
+              <option
+                *ngFor="let category of categories"
+                [value]="category.id"
+              >
+                {{ category.name }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label for="purchasePrice">Precio de compra (COP) *</label>
+            <input
+              id="purchasePrice"
+              name="purchasePrice"
+              type="number"
+              min="0"
+              step="1"
+              [(ngModel)]="form.purchasePrice"
+              required
+              [disabled]="saving"
+            />
+          </div>
+
+          <div class="form-field">
+            <label for="salePrice">Precio de venta (COP) *</label>
+            <input
+              id="salePrice"
+              name="salePrice"
+              type="number"
+              min="0"
+              step="1"
+              [(ngModel)]="form.salePrice"
+              required
+              [disabled]="saving"
+            />
+          </div>
+
+          <div class="form-field">
+            <label for="taxType">Tipo de impuesto</label>
+            <select
+              id="taxType"
+              name="taxType"
+              [(ngModel)]="form.taxType"
+              [disabled]="saving"
+            >
+              <option value="GENERAL">General</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label for="taxRate">Tarifa de impuesto (%)</label>
+            <input
+              id="taxRate"
+              name="taxRate"
+              type="number"
+              min="0"
+              max="100"
+              step="0.01"
+              [ngModel]="form.taxRate / 100"
+              (ngModelChange)="form.taxRate = $event * 100"
+              [disabled]="saving"
+            />
+          </div>
+
+          <div class="form-field" *ngIf="!editingProductId">
+            <label for="stock">Existencias iniciales *</label>
+            <input
+              id="stock"
+              name="stock"
+              type="number"
+              min="0"
+              step="1"
+              [(ngModel)]="form.stock"
+              required
+              [disabled]="saving"
+            />
+          </div>
+
+          <div class="form-field">
+            <label for="minimumStock">Stock mínimo *</label>
+            <input
+              id="minimumStock"
+              name="minimumStock"
+              type="number"
+              min="0"
+              step="1"
+              [(ngModel)]="form.minimumStock"
+              required
+              [disabled]="saving"
+            />
+          </div>
+
+        </div>
+
+        <div class="form-error" *ngIf="errorMessage">
+          {{ errorMessage }}
+        </div>
+
+        <div class="modal-actions">
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="closeForm()"
+            [disabled]="saving"
+          >
+            Cancelar
+          </button>
+
+          <button
+            type="submit"
+            class="primary-button"
+            [disabled]="saving || productForm.invalid"
+          >
+            {{ saving ? 'Guardando...' : 'Guardar producto' }}
+          </button>
+        </div>
+
+      </form>
+    </section>
+  </div>
+
+</div>

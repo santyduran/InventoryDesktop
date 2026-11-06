@@ -1,0 +1,323 @@
+
+<div class="providers-page">
+  <div class="page-heading">
+    <div>
+      <span class="section-label">GESTIÓN DE INVENTARIO</span>
+      <h2>Proveedores</h2>
+      <p>Administra la información de tus proveedores.</p>
+    </div>
+
+    <button
+      *ngIf="isAdmin"
+      class="primary-button"
+      type="button"
+      (click)="openCreateForm()"
+    >
+      <span class="button-icon">+</span>
+      Nuevo proveedor
+    </button>
+  </div>
+
+  <div *ngIf="errorMessage" class="feedback error-feedback">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="successMessage" class="feedback success-feedback">
+    {{ successMessage }}
+  </div>
+
+  <div class="providers-card">
+    <div class="table-toolbar">
+      <div class="toolbar-title">
+        <h3>Listado de proveedores</h3>
+        <span>{{ filteredProviders.length }} registros</span>
+      </div>
+
+      <div class="toolbar-filters">
+        <div class="search-box">
+          <span>⌕</span>
+          <input
+            type="text"
+            placeholder="Buscar por nombre, NIT o contacto..."
+            [(ngModel)]="searchTerm"
+          />
+        </div>
+
+        <select
+          class="status-filter"
+          [(ngModel)]="statusFilter"
+        >
+          <option value="ALL">Todos los estados</option>
+          <option value="ACTIVE">Activos</option>
+          <option value="INACTIVE">Inactivos</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table class="providers-table">
+        <thead>
+          <tr>
+            <th>PROVEEDOR</th>
+            <th>NIT</th>
+            <th>CONTACTO</th>
+            <th>TELÉFONO</th>
+            <th>CIUDAD</th>
+            <th>FACTURAS</th>
+            <th>ESTADO</th>
+            <th *ngIf="isAdmin">ACCIONES</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngIf="loading">
+            <td [attr.colspan]="isAdmin ? 8 : 7" class="table-message">
+              Cargando proveedores...
+            </td>
+          </tr>
+
+          <tr *ngIf="!loading && filteredProviders.length === 0">
+            <td [attr.colspan]="isAdmin ? 8 : 7" class="table-message">
+              No se encontraron proveedores.
+            </td>
+          </tr>
+
+          <tr *ngFor="let provider of filteredProviders">
+            <td>
+              <div class="provider-information">
+                <strong>{{ provider.businessName }}</strong>
+                <small>{{ provider.email || 'Sin correo registrado' }}</small>
+              </div>
+            </td>
+
+            <td>
+              {{ provider.nit }}<span *ngIf="provider.verificationDigit">-{{ provider.verificationDigit }}</span>
+            </td>
+
+            <td>{{ provider.contactName || '—' }}</td>
+            <td>{{ provider.phone || '—' }}</td>
+            <td>{{ provider.city || '—' }}</td>
+            <td>
+              <span class="invoice-count">
+                {{ provider._count?.purchaseInvoices ?? 0 }}
+              </span>
+            </td>
+
+            <td>
+              <span
+                class="status-badge"
+                [class.status-active]="provider.isActive"
+                [class.status-inactive]="!provider.isActive"
+              >
+                {{ provider.isActive ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+
+            <td *ngIf="isAdmin">
+              <div class="action-buttons">
+                <button
+                  type="button"
+                  class="action-button edit-button"
+                  (click)="openEditForm(provider)"
+                >
+                  Editar
+                </button>
+
+                <button
+                  type="button"
+                  class="action-button"
+                  [class.deactivate-button]="provider.isActive"
+                  [class.activate-button]="!provider.isActive"
+                  (click)="toggleProviderStatus(provider)"
+                >
+                  {{ provider.isActive ? 'Desactivar' : 'Activar' }}
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer">
+      <span>
+        Mostrando {{ filteredProviders.length }} de {{ providers.length }} proveedores
+      </span>
+
+      <button
+        type="button"
+        class="refresh-button"
+        (click)="loadProviders()"
+      >
+        ↻ Actualizar
+      </button>
+    </div>
+  </div>
+
+  <div
+    class="modal-overlay"
+    *ngIf="showForm"
+    (click)="closeForm()"
+  >
+    <div
+      class="provider-modal"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal-header">
+        <div>
+          <span class="section-label">PROVEEDORES</span>
+          <h3>{{ editingProviderId ? 'Editar proveedor' : 'Nuevo proveedor' }}</h3>
+          <p>Completa la información del proveedor.</p>
+        </div>
+
+        <button
+          type="button"
+          class="close-button"
+          (click)="closeForm()"
+        >
+          ×
+        </button>
+      </div>
+
+      <form (ngSubmit)="saveProvider()">
+        <div class="form-grid">
+          <div class="form-field full-width">
+            <label>Razón social / Nombre *</label>
+            <input
+              type="text"
+              name="businessName"
+              [(ngModel)]="form.businessName"
+              placeholder="Nombre del proveedor"
+              required
+            />
+          </div>
+
+          <div class="form-field">
+            <label>NIT *</label>
+            <input
+              type="text"
+              name="nit"
+              [(ngModel)]="form.nit"
+              placeholder="Ej. 900123456"
+              required
+            />
+          </div>
+
+          <div class="form-field">
+            <label>Dígito de verificación</label>
+            <input
+              type="text"
+              name="verificationDigit"
+              [(ngModel)]="form.verificationDigit"
+              placeholder="Ej. 7"
+              maxlength="2"
+            />
+          </div>
+
+          <div class="form-field">
+            <label>Nombre del contacto</label>
+            <input
+              type="text"
+              name="contactName"
+              [(ngModel)]="form.contactName"
+              placeholder="Persona de contacto"
+            />
+          </div>
+
+          <div class="form-field">
+            <label>Teléfono</label>
+            <input
+              type="text"
+              name="phone"
+              [(ngModel)]="form.phone"
+              placeholder="Número de teléfono"
+            />
+          </div>
+
+          <div class="form-field full-width">
+            <label>Correo electrónico</label>
+            <input
+              type="email"
+              name="email"
+              [(ngModel)]="form.email"
+              placeholder="correo@proveedor.com"
+            />
+          </div>
+
+          <div class="form-field full-width">
+            <label>Dirección</label>
+            <input
+              type="text"
+              name="address"
+              [(ngModel)]="form.address"
+              placeholder="Dirección del proveedor"
+            />
+          </div>
+
+          <div class="form-field">
+            <label>Ciudad</label>
+            <input
+              type="text"
+              name="city"
+              [(ngModel)]="form.city"
+              placeholder="Ciudad"
+            />
+          </div>
+
+          <div class="form-field">
+            <label>Estado / Departamento</label>
+            <input
+              type="text"
+              name="state"
+              [(ngModel)]="form.state"
+              placeholder="Departamento"
+            />
+          </div>
+
+          <div class="form-field full-width">
+            <label>Número de cuenta bancaria</label>
+            <input
+              type="text"
+              name="bankAccount"
+              [(ngModel)]="form.bankAccount"
+              placeholder="Cuenta bancaria del proveedor"
+            />
+          </div>
+
+          <div class="form-field full-width">
+            <label>Observaciones</label>
+            <textarea
+              name="observations"
+              [(ngModel)]="form.observations"
+              rows="3"
+              placeholder="Información adicional..."
+            ></textarea>
+          </div>
+        </div>
+
+        <div *ngIf="errorMessage" class="feedback error-feedback">
+          {{ errorMessage }}
+        </div>
+
+        <div class="modal-actions">
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="closeForm()"
+            [disabled]="saving"
+          >
+            Cancelar
+          </button>
+
+          <button
+            type="submit"
+            class="primary-button"
+            [disabled]="saving"
+          >
+            {{ saving ? 'Guardando...' : (editingProviderId ? 'Guardar cambios' : 'Registrar proveedor') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,264 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ==========================================
+// USUARIOS Y SEGURIDAD
+// ==========================================
+
+model User {
+  id           String   @id @default(cuid())
+  fullName     String
+  username     String   @unique
+  passwordHash String
+  role         String   @default("OPERADOR")
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  sales              Sale[]              @relation("SaleCreator")
+  purchaseInvoices   PurchaseInvoice[]   @relation("PurchaseCreator")
+  inventoryMovements InventoryMovement[] @relation("MovementUser")
+  refreshSessions    RefreshSession[]
+  backupRecords      BackupRecord[]
+}
+
+model RefreshSession {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ==========================================
+// CATEGORIAS Y PRODUCTOS
+// ==========================================
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products Product[]
+}
+
+model Product {
+  id          String  @id @default(cuid())
+  code        String  @unique
+  barcode     String? @unique
+  name        String
+  description String?
+  categoryId  String
+
+  purchasePrice Int
+  salePrice     Int
+
+  // GENERAL, EXENTO o EXCLUIDO
+  taxType String @default("GENERAL")
+
+  // 1900 = 19%, 500 = 5%, 0 = 0%
+  taxRate Int @default(1900)
+
+  stock        Int     @default(0)
+  minimumStock Int     @default(0)
+  isActive     Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  category        Category            @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  purchaseDetails PurchaseDetail[]
+  saleDetails     SaleDetail[]
+  movements       InventoryMovement[]
+
+  @@index([name])
+  @@index([categoryId])
+}
+
+// ==========================================
+// PROVEEDORES
+// ==========================================
+
+model Provider {
+  id                String   @id @default(cuid())
+  businessName      String
+  nit               String   @unique
+  verificationDigit String?
+  contactName       String?
+  phone             String?
+  email             String?
+  address           String?
+  city              String?
+  state             String?
+  bankAccount       String?
+  observations      String?
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  purchaseInvoices PurchaseInvoice[]
+}
+
+// ==========================================
+// COMPRAS Y FACTURAS
+// ==========================================
+
+model PurchaseInvoice {
+  id            String @id @default(cuid())
+  invoiceNumber String
+  providerId    String
+  createdById   String
+
+  issueDate DateTime
+  dueDate   DateTime?
+
+  subtotal Int
+  taxTotal Int
+  total    Int
+
+  // DRAFT, CONFIRMED, CANCELLED
+  status String @default("DRAFT")
+
+  observations String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  provider  Provider @relation(fields: [providerId], references: [id], onDelete: Restrict)
+  createdBy User     @relation("PurchaseCreator", fields: [createdById], references: [id], onDelete: Restrict)
+
+  details PurchaseDetail[]
+
+  @@unique([providerId, invoiceNumber])
+  @@index([issueDate])
+  @@index([status])
+}
+
+model PurchaseDetail {
+  id                String @id @default(cuid())
+  purchaseInvoiceId String
+  productId         String
+
+  quantity  Int
+  unitCost  Int
+  taxRate   Int
+  subtotal  Int
+  taxAmount Int
+  total     Int
+
+  invoice PurchaseInvoice @relation(fields: [purchaseInvoiceId], references: [id], onDelete: Cascade)
+  product Product         @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([productId])
+}
+
+// ==========================================
+// VENTAS
+// ==========================================
+
+model Sale {
+  id          String @id @default(cuid())
+  saleNumber  String @unique
+  createdById String
+
+  soldAt DateTime @default(now())
+
+  subtotal Int
+  taxTotal Int
+  total    Int
+
+  // CASH, CARD, TRANSFER
+  paymentMethod String
+
+  // CONFIRMED, CANCELLED
+  status String @default("CONFIRMED")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  createdBy User @relation("SaleCreator", fields: [createdById], references: [id], onDelete: Restrict)
+
+  details SaleDetail[]
+
+  @@index([soldAt])
+  @@index([status])
+}
+
+model SaleDetail {
+  id        String @id @default(cuid())
+  saleId    String
+  productId String
+
+  quantity  Int
+  unitPrice Int
+  taxRate   Int
+  subtotal  Int
+  taxAmount Int
+  total     Int
+
+  sale    Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([productId])
+}
+
+// ==========================================
+// MOVIMIENTOS DE INVENTARIO
+// ==========================================
+
+model InventoryMovement {
+  id        String @id @default(cuid())
+  productId String
+  userId    String
+
+  // ENTRY, SALE, ADJUSTMENT, CANCELLATION
+  movementType String
+
+  quantity Int
+
+  stockBefore Int
+  stockAfter  Int
+
+  // PURCHASE, SALE, ADJUSTMENT, CANCELLATION
+  referenceType String?
+  referenceId   String?
+
+  observations String?
+  createdAt    DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  user    User    @relation("MovementUser", fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([productId, createdAt])
+  @@index([movementType])
+  @@index([referenceType, referenceId])
+}
+
+// ==========================================
+// COPIAS DE SEGURIDAD
+// ==========================================
+
+model BackupRecord {
+  id         String   @id @default(cuid())
+  userId     String?
+  filePath   String
+  backupType String
+  status     String
+  createdAt  DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+}

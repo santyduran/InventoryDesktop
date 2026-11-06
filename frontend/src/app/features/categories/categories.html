@@ -1,0 +1,274 @@
+
+<div class="categories-page">
+
+  <div class="page-heading">
+    <div>
+      <span class="section-label">GESTIÓN DE INVENTARIO</span>
+      <h2>Categorías</h2>
+      <p>Organiza los repuestos y productos de tu taller.</p>
+    </div>
+
+    <button
+      *ngIf="isAdmin"
+      type="button"
+      class="primary-button"
+      (click)="openCreateForm()"
+    >
+      <span class="button-icon">+</span>
+      Nueva categoría
+    </button>
+  </div>
+
+  <div class="feedback error-feedback" *ngIf="errorMessage">
+    <span>!</span>
+    {{ errorMessage }}
+  </div>
+
+  <div class="feedback success-feedback" *ngIf="successMessage">
+    <span>✓</span>
+    {{ successMessage }}
+  </div>
+
+  <section class="categories-card">
+
+    <div class="table-toolbar">
+      <div class="toolbar-title">
+        <h3>Listado de categorías</h3>
+        <span>{{ filteredCategories.length }} registros</span>
+      </div>
+
+      <div class="toolbar-filters">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle
+              cx="11"
+              cy="11"
+              r="7"
+              stroke="currentColor"
+              stroke-width="1.7"
+            />
+            <path
+              d="m16 16 4 4"
+              stroke="currentColor"
+              stroke-width="1.7"
+              stroke-linecap="round"
+            />
+          </svg>
+
+          <input
+            type="search"
+            [(ngModel)]="searchTerm"
+            placeholder="Buscar por nombre o descripción..."
+          />
+        </div>
+
+        <select
+          class="status-filter"
+          [(ngModel)]="statusFilter"
+          aria-label="Filtrar por estado"
+        >
+          <option value="ALL">Todos los estados</option>
+          <option value="ACTIVE">Activas</option>
+          <option value="INACTIVE">Inactivas</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table class="categories-table">
+        <thead>
+          <tr>
+            <th>CATEGORÍA</th>
+            <th>DESCRIPCIÓN</th>
+            <th>PRODUCTOS ASOCIADOS</th>
+            <th>FECHA DE CREACIÓN</th>
+            <th>ESTADO</th>
+            <th *ngIf="isAdmin">ACCIONES</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngIf="loading">
+            <td [attr.colspan]="isAdmin ? 6 : 5" class="table-message">
+              Cargando categorías...
+            </td>
+          </tr>
+
+          <tr *ngIf="!loading && filteredCategories.length === 0">
+            <td [attr.colspan]="isAdmin ? 6 : 5" class="table-message">
+              No se encontraron categorías.
+            </td>
+          </tr>
+
+          <tr *ngFor="let category of filteredCategories">
+            <td>
+              <div class="category-information">
+                <strong>{{ category.name }}</strong>
+              </div>
+            </td>
+
+            <td>
+              <span class="description-cell">
+                {{ category.description || 'Sin descripción' }}
+              </span>
+            </td>
+
+            <td>
+              <span class="product-count">
+                {{ category._count?.products ?? 0 }}
+              </span>
+            </td>
+
+            <td>
+              {{ formatDate(category.createdAt) }}
+            </td>
+
+            <td>
+              <span
+                class="status-badge"
+                [class.status-active]="category.isActive"
+                [class.status-inactive]="!category.isActive"
+              >
+                {{ category.isActive ? 'Activa' : 'Inactiva' }}
+              </span>
+            </td>
+
+            <td *ngIf="isAdmin">
+              <div class="action-buttons">
+                <button
+                  type="button"
+                  class="action-button edit-button"
+                  title="Editar categoría"
+                  (click)="openEditForm(category)"
+                >
+                  Editar
+                </button>
+
+                <button
+                  type="button"
+                  class="action-button"
+                  [class.activate-button]="!category.isActive"
+                  [class.deactivate-button]="category.isActive"
+                  (click)="toggleCategoryStatus(category)"
+                >
+                  {{ category.isActive ? 'Desactivar' : 'Activar' }}
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer">
+      <span>
+        Mostrando {{ filteredCategories.length }} de
+        {{ categories.length }} categorías
+      </span>
+
+      <button
+        type="button"
+        class="refresh-button"
+        (click)="loadCategories()"
+        [disabled]="loading"
+      >
+        ↻ Actualizar
+      </button>
+    </div>
+
+  </section>
+
+  <div class="modal-overlay" *ngIf="showForm" (click)="closeForm()">
+    <section
+      class="category-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="category-modal-title"
+      (click)="$event.stopPropagation()"
+    >
+
+      <div class="modal-header">
+        <div>
+          <span class="section-label">INVENTARIO</span>
+
+          <h3 id="category-modal-title">
+            {{ editingCategoryId ? 'Editar categoría' : 'Nueva categoría' }}
+          </h3>
+
+          <p>Completa la información de la categoría.</p>
+        </div>
+
+        <button
+          type="button"
+          class="close-button"
+          (click)="closeForm()"
+          [disabled]="saving"
+          aria-label="Cerrar"
+        >
+          ×
+        </button>
+      </div>
+
+      <form #categoryForm="ngForm" (ngSubmit)="saveCategory()">
+
+        <div class="form-grid">
+
+          <div class="form-field full-width">
+            <label for="categoryName">Nombre de la categoría *</label>
+
+            <input
+              id="categoryName"
+              name="categoryName"
+              type="text"
+              [(ngModel)]="form.name"
+              placeholder="Ej. Repuestos de motor"
+              required
+              [disabled]="saving"
+            />
+          </div>
+
+          <div class="form-field full-width">
+            <label for="categoryDescription">Descripción</label>
+
+            <textarea
+              id="categoryDescription"
+              name="categoryDescription"
+              [(ngModel)]="form.description"
+              placeholder="Descripción de la categoría"
+              rows="4"
+              [disabled]="saving"
+            ></textarea>
+          </div>
+
+        </div>
+
+        <div class="form-error" *ngIf="errorMessage">
+          {{ errorMessage }}
+        </div>
+
+        <div class="modal-actions">
+
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="closeForm()"
+            [disabled]="saving"
+          >
+            Cancelar
+          </button>
+
+          <button
+            type="submit"
+            class="primary-button"
+            [disabled]="saving || categoryForm.invalid"
+          >
+            {{ saving ? 'Guardando...' : 'Guardar categoría' }}
+          </button>
+
+        </div>
+
+      </form>
+    </section>
+  </div>
+
+</div>

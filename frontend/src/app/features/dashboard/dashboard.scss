@@ -1,0 +1,275 @@
+
+:host {
+  display: block;
+  min-height: 100vh;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.dashboard-layout {
+  min-height: 100vh;
+  display: flex;
+  background: #f3f6f8;
+}
+
+app-sidebar {
+  flex: 0 0 260px;
+}
+
+.dashboard-main {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-content {
+  flex: 1;
+  padding: 30px;
+}
+
+.welcome-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 34px;
+}
+
+.section-label {
+  color: #18769c;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+.welcome-section h2 {
+  margin: 9px 0 8px;
+  color: #172c3a;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.6px;
+}
+
+.welcome-section p {
+  margin: 0;
+  color: #788892;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.section-heading {
+  margin-bottom: 16px;
+
+  h3 {
+    margin: 0 0 6px;
+    color: #263b48;
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 0;
+    color: #84919a;
+    font-size: 11px;
+  }
+}
+
+.indicators-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 17px;
+  margin-bottom: 28px;
+}
+
+.indicator-card {
+  min-width: 0;
+  padding: 19px;
+  border: 1px solid #e8edf0;
+  border-radius: 9px;
+  background: #ffffff;
+  box-shadow: 0 3px 12px rgba(23, 44, 58, 0.035);
+}
+
+.indicator-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 19px;
+}
+
+.indicator-icon {
+  width: 37px;
+  height: 37px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 19px;
+  font-weight: 600;
+}
+
+.products-icon {
+  background: #e8f2f7;
+  color: #176b91;
+}
+
+.stock-icon {
+  background: #fff3e4;
+  color: #c4812f;
+}
+
+.entries-icon {
+  background: #e8f7ef;
+  color: #26996a;
+}
+
+.exits-icon {
+  background: #fceeed;
+  color: #c75c50;
+}
+
+.indicator-status {
+  color: #8a969d;
+  font-size: 9px;
+}
+
+.indicator-title {
+  display: block;
+  margin-bottom: 9px;
+  color: #647580;
+  font-size: 11px;
+}
+
+.indicator-value {
+  display: block;
+  margin-bottom: 7px;
+  color: #243b49;
+  font-size: 25px;
+  font-weight: 700;
+}
+
+.indicator-description {
+  color: #9aa5ab;
+  font-size: 9px;
+}
+
+.activity-card {
+  padding: 22px;
+  border: 1px solid #e8edf0;
+  border-radius: 9px;
+  background: #ffffff;
+  box-shadow: 0 3px 12px rgba(23, 44, 58, 0.035);
+}
+
+.activity-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding-bottom: 17px;
+  border-bottom: 1px solid #edf0f2;
+
+  h3 {
+    margin: 0 0 6px;
+    color: #263b48;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 0;
+    color: #87949c;
+    font-size: 10px;
+  }
+}
+
+.pending-label {
+  padding: 6px 9px;
+  border-radius: 5px;
+  background: #f0f3f5;
+  color: #77858d;
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.empty-state {
+  min-height: 190px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+}
+
+.empty-icon {
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  border-radius: 50%;
+  background: #f0f5f7;
+  color: #6c9aaf;
+
+  svg {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+.empty-state h4 {
+  margin: 0 0 7px;
+  color: #455965;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.empty-state p {
+  max-width: 290px;
+  margin: 0;
+  color: #97a3aa;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.dashboard-footer {
+  padding: 25px 0 5px;
+  color: #9aa5ab;
+  font-size: 10px;
+  text-align: center;
+}
+
+@media (max-width: 1100px) {
+  .indicators-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .dashboard-layout {
+    flex-direction: column;
+  }
+
+  app-sidebar {
+    flex-basis: auto;
+  }
+
+  .dashboard-content {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .indicators-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .welcome-section h2 {
+    font-size: 20px;
+  }
+
+  .activity-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

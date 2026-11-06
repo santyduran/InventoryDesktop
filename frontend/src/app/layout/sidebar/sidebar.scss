@@ -1,0 +1,150 @@
+
+:host {
+  display: block;
+  height: 100%;
+}
+
+.sidebar {
+  width: 260px;
+  height: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 26px 18px 18px;
+  background: #142733;
+  color: #ffffff;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 8px 30px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.brand-icon {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: rgba(67, 166, 202, 0.15);
+  color: #63b9dc;
+
+  svg {
+    width: 25px;
+    height: 25px;
+  }
+}
+
+.brand-text {
+  min-width: 0;
+
+  h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+
+    span {
+      color: #63b9dc;
+    }
+  }
+
+  p {
+    margin: 5px 0 0;
+    color: #849aa6;
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 1.3px;
+  }
+}
+
+.menu-section {
+  margin-top: 29px;
+}
+
+.section-title {
+  display: block;
+  margin: 0 0 12px 10px;
+  color: #8296a2;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.menu-item {
+  min-height: 43px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 11px;
+  border-radius: 7px;
+  color: #b8c7ce;
+  font-size: 12px;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+
+  &.active {
+    background: #20516a;
+    color: #ffffff;
+    box-shadow: inset 3px 0 #63b9dc;
+  }
+
+  &.disabled {
+    opacity: 0.7;
+    cursor: default;
+  }
+
+  small {
+    margin-left: auto;
+    color: #8196a2;
+    font-size: 8px;
+  }
+}
+
+.menu-icon {
+  width: 20px;
+  display: flex;
+  justify-content: center;
+  color: #8fa8b5;
+  font-size: 17px;
+}
+
+.menu-item.active .menu-icon {
+  color: #63b9dc;
+}
+
+.sidebar-footer {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: auto;
+  padding: 17px 9px 5px;
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+  color: #91a4ae;
+  font-size: 10px;
+}
+
+.footer-indicator {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #39b982;
+  box-shadow: 0 0 8px rgba(57, 185, 130, 0.5);
+}
+
+@media (max-width: 760px) {
+  .sidebar {
+    width: 220px;
+  }
+}

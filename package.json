@@ -1,0 +1,87 @@
+
+{
+  "name": "inventorydesktop",
+  "version": "1.0.0",
+  "productName": "InventoryDesktop",
+  "description": "Sistema de gestión de inventario",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "backend:dev": "npm --prefix backend run start:dev",
+    "frontend:dev": "npm --prefix frontend run start -- --host 127.0.0.1",
+    "electron:dev": "wait-on http://127.0.0.1:4200 http://127.0.0.1:3000 && electron .",
+    "dev": "concurrently -k -r \"npm:backend:dev\" \"npm:frontend:dev\" \"npm:electron:dev\"",
+    "build:win": "electron-builder --win nsis",
+    "pack:win": "electron-builder --dir --win"
+  },
+  "keywords": [
+    "inventory",
+    "desktop",
+    "management"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "concurrently": "^10.0.6",
+    "electron": "^45.2.3",
+    "electron-builder": "^26.18.0",
+    "wait-on": "^9.5.1"
+  },
+  "build": {
+    "appId": "com.inventorydesktop.app",
+    "productName": "InventoryDesktop",
+    "asar": true,
+    "directories": {
+      "output": "release/installer",
+      "buildResources": "electron"
+    },
+    "files": [
+      "electron/main.cjs",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "release/backend",
+        "to": "backend"
+      },
+      {
+        "from": "release/backend/node_modules",
+        "to": "backend/node_modules",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "frontend/dist/frontend/browser",
+        "to": "frontend/browser"
+      },
+      {
+        "from": "electron/runtime/node/node.exe",
+        "to": "node/node.exe"
+      },
+      {
+        "from": "release/database-template",
+        "to": "database-template"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "InventoryDesktop-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "InventoryDesktop"
+    }
+  }
+}

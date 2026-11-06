@@ -1,0 +1,46 @@
+
+<header class="header">
+  <div class="header-title">
+    <span class="header-subtitle">INVENTORY DESKTOP</span>
+    <h1>Panel de control</h1>
+  </div>
+
+  <div class="header-actions">
+    <div class="user-information">
+      <div class="user-avatar">
+        {{ userName.charAt(0).toUpperCase() }}
+      </div>
+
+      <div class="user-details">
+        <span class="user-name">{{ userName }}</span>
+        <span class="user-role">{{ userRole }}</span>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      class="logout-button"
+      (click)="logout()"
+      title="Cerrar sesión"
+    >
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path
+          d="M10 17l5-5-5-5"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M15 12H3m9-8h5a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-5"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+
+      <span>Cerrar sesión</span>
+    </button>
+  </div>
+</header>
