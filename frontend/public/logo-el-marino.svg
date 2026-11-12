@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 420" role="img" aria-labelledby="title">
+  <title id="title">El Marino · Taller de Motos</title>
+  <defs>
+    <linearGradient id="core" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2f7fd6"/>
+      <stop offset="1" stop-color="#0b2545"/>
+    </linearGradient>
+    <linearGradient id="letters" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d9f0ff"/>
+      <stop offset="0.45" stop-color="#6fc0ff"/>
+      <stop offset="1" stop-color="#1f6fd1"/>
+    </linearGradient>
+    <linearGradient id="steel" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#b9c7d6"/>
+    </linearGradient>
+    <pattern id="checker" width="16" height="16" patternUnits="userSpaceOnUse">
+      <rect width="16" height="16" fill="#ffffff"/>
+      <rect width="8" height="8" fill="#0b2545"/>
+      <rect x="8" y="8" width="8" height="8" fill="#0b2545"/>
+    </pattern>
+    <mask id="jaw" maskUnits="userSpaceOnUse" x="-60" y="-60" width="120" height="260">
+      <rect x="-60" y="-60" width="120" height="260" fill="#fff"/>
+      <rect x="-10" y="-50" width="20" height="34" rx="3" fill="#000"/>
+    </mask>
+    <g id="wrench" mask="url(#jaw)">
+      <circle cx="0" cy="-12" r="28" fill="url(#steel)" stroke="#0b2545" stroke-width="5"/>
+      <rect x="-11" y="-6" width="22" height="160" rx="11" fill="url(#steel)" stroke="#0b2545" stroke-width="5"/>
+    </g>
+    <rect id="tooth" x="226" y="42" width="28" height="30" rx="4"/>
+  </defs>
+
+  <!-- Llaves cruzadas -->
+  <use href="#wrench" transform="translate(112 92) rotate(-42)"/>
+  <use href="#wrench" transform="translate(368 92) rotate(42)"/>
+
+  <!-- Engranaje: primero la silueta blanca (contorno) y encima la azul -->
+  <g id="gear">
+    <use href="#tooth"/>
+    <use href="#tooth" transform="rotate(22.5 240 165)"/>
+    <use href="#tooth" transform="rotate(45 240 165)"/>
+    <use href="#tooth" transform="rotate(67.5 240 165)"/>
+    <use href="#tooth" transform="rotate(90 240 165)"/>
+    <use href="#tooth" transform="rotate(270 240 165)"/>
+    <use href="#tooth" transform="rotate(292.5 240 165)"/>
+    <use href="#tooth" transform="rotate(315 240 165)"/>
+    <use href="#tooth" transform="rotate(337.5 240 165)"/>
+    <circle cx="240" cy="165" r="104"/>
+  </g>
+  <use href="#gear" fill="#ffffff" stroke="#ffffff" stroke-width="12" stroke-linejoin="round"/>
+  <use href="#gear" fill="#0b2545"/>
+  <circle cx="240" cy="165" r="88" fill="url(#core)" stroke="#6fc0ff" stroke-width="3"/>
+
+  <!-- Moto -->
+  <g fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="186" cy="190" r="25" stroke-width="7"/>
+    <circle cx="296" cy="190" r="25" stroke-width="7"/>
+    <path d="M296 190 L270 128" stroke-width="7"/>
+    <path d="M258 124 L282 116" stroke-width="6"/>
+    <path d="M186 190 L230 178" stroke-width="7"/>
+    <path d="M184 158 L200 184" stroke-width="6"/>
+    <path d="M264 146 L248 180" stroke-width="6"/>
+    <path d="M226 186 L166 182" stroke-width="5"/>
+  </g>
+  <g fill="#ffffff">
+    <circle cx="186" cy="190" r="6"/>
+    <circle cx="296" cy="190" r="6"/>
+    <circle cx="282" cy="140" r="8"/>
+    <path d="M222 150 Q244 128 272 134 L268 154 L224 160 Z"/>
+    <path d="M166 144 L226 150 L226 160 L184 163 Q170 158 166 144 Z"/>
+    <path d="M222 158 L262 154 L256 186 L226 188 Z"/>
+  </g>
+
+  <!-- Punta con bandera a cuadros -->
+  <path d="M168 346 L312 346 L240 408 Z" fill="url(#checker)" stroke="#0b2545" stroke-width="6" stroke-linejoin="round"/>
+
+  <!-- Placa del nombre -->
+  <path d="M74 236 L424 236 L406 318 L56 318 Z" fill="#0b2545" stroke="#ffffff" stroke-width="6" stroke-linejoin="round"/>
+
+  <!-- EL -->
+  <path d="M70 206 L162 206 L154 246 L62 246 Z" fill="#0b2545" stroke="#ffffff" stroke-width="5" stroke-linejoin="round"/>
+  <text x="108" y="239" text-anchor="middle" font-family="'Arial Black', 'Helvetica Neue', Arial, sans-serif" font-weight="900" font-style="italic" font-size="34" fill="url(#letters)" stroke="#ffffff" stroke-width="2" paint-order="stroke">EL</text>
+
+  <!-- MARINO -->
+  <text x="240" y="303" text-anchor="middle" textLength="330" lengthAdjust="spacingAndGlyphs" font-family="'Arial Black', 'Helvetica Neue', Arial, sans-serif" font-weight="900" font-style="italic" font-size="68" fill="url(#letters)" stroke="#ffffff" stroke-width="6" stroke-linejoin="round" paint-order="stroke">MARINO</text>
+
+  <!-- TALLER DE MOTOS -->
+  <path d="M110 318 L376 318 L368 352 L102 352 Z" fill="#ffffff" stroke="#0b2545" stroke-width="5" stroke-linejoin="round"/>
+  <text x="239" y="344" text-anchor="middle" textLength="236" lengthAdjust="spacingAndGlyphs" font-family="'Arial Black', 'Helvetica Neue', Arial, sans-serif" font-weight="900" font-style="italic" font-size="24" fill="#0b2545">TALLER DE MOTOS</text>
+</svg>

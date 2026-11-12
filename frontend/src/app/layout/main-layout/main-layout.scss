@@ -10,8 +10,13 @@
   background: #f3f6f8;
 }
 
+// El menú queda fijo a la izquierda mientras el contenido hace scroll.
 app-sidebar {
-  flex: 0 0 260px;
+  flex: 0 0 296px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  align-self: flex-start;
 }
 
 .main-content {
@@ -34,6 +39,9 @@ app-sidebar {
 
   app-sidebar {
     flex-basis: auto;
+    position: static;
+    height: auto;
+    align-self: stretch;
   }
 
   .page-content {

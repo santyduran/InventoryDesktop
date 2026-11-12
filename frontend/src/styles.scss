@@ -1,1 +1,24 @@
-/* You can add global styles to this file, and also import other style files */
+/* Estilos globales */
+
+:root {
+  /* Fuente del sistema: Segoe UI en Windows, San Francisco en macOS.
+     No requiere descargas, así que funciona sin internet. */
+  --app-font: 'Segoe UI Variable Text', 'Segoe UI', -apple-system,
+    BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+html,
+body {
+  margin: 0;
+  font-family: var(--app-font);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
