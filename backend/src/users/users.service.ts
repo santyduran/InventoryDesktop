@@ -99,6 +99,42 @@ export class UsersService {
     return user;
   }
 
+  /**
+   * Impide quitar el rol o desactivar al último administrador activo:
+   * sin él nadie podría volver a gestionar usuarios.
+   */
+  private async ensureAnActiveAdminRemains(
+    id: string,
+    changes: { role?: string; isActive?: boolean },
+  ): Promise<void> {
+    const losesAdminAccess =
+      (changes.role !== undefined && changes.role !== 'ADMIN') ||
+      changes.isActive === false;
+
+    if (!losesAdminAccess) {
+      return;
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: { role: true, isActive: true },
+    });
+
+    if (!user || user.role !== 'ADMIN' || !user.isActive) {
+      return;
+    }
+
+    const otherActiveAdmins = await this.prisma.user.count({
+      where: { role: 'ADMIN', isActive: true, id: { not: id } },
+    });
+
+    if (otherActiveAdmins === 0) {
+      throw new ConflictException(
+        'Debe quedar al menos un administrador activo. Crea o activa otro administrador antes de hacer este cambio.',
+      );
+    }
+  }
+
   async update(id: string, dto: UpdateUserDto) {
     await this.findOne(id);
 
@@ -149,6 +185,8 @@ export class UsersService {
     if (dto.isActive !== undefined) {
       data.isActive = dto.isActive;
     }
+
+    await this.ensureAnActiveAdminRemains(id, data);
 
     try {
       return await this.prisma.user.update({

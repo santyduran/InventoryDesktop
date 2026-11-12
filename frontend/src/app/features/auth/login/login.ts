@@ -3,7 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { Component, inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { AuthService } from '../../../core/services/auth.service';
 
@@ -20,6 +20,7 @@ const REMEMBERED_USERNAME_KEY = 'inventory_remembered_username';
 export class Login implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly platformId = inject(PLATFORM_ID);
 
   username = '';
@@ -34,6 +35,10 @@ export class Login implements OnInit {
     // La consulta solo debe ejecutarse en el navegador.
     if (!isPlatformBrowser(this.platformId)) {
       return;
+    }
+
+    if (this.route.snapshot.queryParamMap.get('reason') === 'session-expired') {
+      this.errorMessage = 'Tu sesión terminó. Vuelve a iniciar sesión.';
     }
 
     const rememberedUsername = this.readRememberedUsername();

@@ -6,6 +6,7 @@ import {
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { UserRole } from '../../common/enums/user-role.enum.js';
+import { PrismaService } from '../../prisma/prisma.service.js';
 
 export interface AuthenticatedUser {
   id: string;
@@ -31,7 +32,7 @@ function getJwtSecret(): string {
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor() {
+  constructor(private readonly prisma: PrismaService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -39,19 +40,37 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  validate(payload: JwtPayload): AuthenticatedUser {
-    if (
-      !payload.sub ||
-      !payload.username ||
-      !Object.values(UserRole).includes(payload.role)
-    ) {
+  /**
+   * Además de la firma, se comprueba en la base de datos que el usuario
+   * siga existiendo y activo, y se usa su rol actual (no el del token).
+   * Así, desactivar a alguien o cambiarle el rol aplica de inmediato.
+   */
+  async validate(payload: JwtPayload): Promise<AuthenticatedUser> {
+    if (!payload.sub || !payload.username) {
+      throw new UnauthorizedException('Token inválido.');
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: payload.sub },
+      select: { id: true, username: true, role: true, isActive: true },
+    });
+
+    if (!user || !user.isActive) {
+      throw new UnauthorizedException(
+        'La sesión ya no es válida. Inicia sesión de nuevo.',
+      );
+    }
+
+    const role = user.role as UserRole;
+
+    if (!Object.values(UserRole).includes(role)) {
       throw new UnauthorizedException('Token inválido.');
     }
 
     return {
-      id: payload.sub,
-      username: payload.username,
-      role: payload.role,
+      id: user.id,
+      username: user.username,
+      role,
     };
   }
 }
