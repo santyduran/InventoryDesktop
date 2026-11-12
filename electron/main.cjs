@@ -434,13 +434,8 @@ async function createWindow() {
     },
   });
 
-  if (isProductionPreview()) {
-    const localUrl = await startStaticServer();
-    await mainWindow.loadURL(localUrl);
-  } else {
-    await mainWindow.loadURL('http://127.0.0.1:4200');
-  }
-
+  // Registrar antes de cargar: `ready-to-show` puede dispararse antes de que
+  // loadURL se resuelva y, en ese caso, la ventana nunca se mostraría.
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
   });
@@ -448,6 +443,13 @@ async function createWindow() {
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
+
+  if (isProductionPreview()) {
+    const localUrl = await startStaticServer();
+    await mainWindow.loadURL(localUrl);
+  } else {
+    await mainWindow.loadURL('http://127.0.0.1:4200');
+  }
 }
 
 app.whenReady().then(async () => {
