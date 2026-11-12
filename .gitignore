@@ -12,7 +12,11 @@ coverage/
 
 # Instaladores y archivos de publicación
 release/
-backups/
+
+# Respaldos de bases de datos (no el código de src/**/backups)
+/backups/
+backend/backups/
+*.db.tmp
 
 # Variables de entorno y credenciales
 .env

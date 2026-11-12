@@ -1,0 +1,89 @@
+<div class="backups-page">
+  <div class="page-heading">
+    <div>
+      <span class="section-label">ADMINISTRACIÓN</span>
+      <h2>Respaldos</h2>
+      <p>Copias de seguridad de toda la información del inventario.</p>
+    </div>
+
+    <button
+      type="button"
+      class="primary-button"
+      (click)="createBackup()"
+      [disabled]="creating"
+    >
+      {{ creating ? 'Creando respaldo...' : 'Crear respaldo ahora' }}
+    </button>
+  </div>
+
+  <div *ngIf="errorMessage" class="feedback error-feedback">{{ errorMessage }}</div>
+  <div *ngIf="successMessage" class="feedback success-feedback">{{ successMessage }}</div>
+
+  <div class="info-grid">
+    <div class="info-card" [class.warning]="!loading && isLastBackupOld">
+      <span class="info-label">Último respaldo</span>
+      <strong *ngIf="lastBackup">{{ formatDate(lastBackup.createdAt) }}</strong>
+      <strong *ngIf="!lastBackup && !loading">Ninguno todavía</strong>
+      <small *ngIf="!loading && isLastBackupOld">Crea un respaldo ahora.</small>
+    </div>
+
+    <div class="info-card">
+      <span class="info-label">Respaldo automático</span>
+      <strong>Una vez al día</strong>
+      <small>Se guardan los últimos 14 y otro antes de cada actualización.</small>
+    </div>
+
+    <div class="info-card tip">
+      <span class="info-label">Recomendación</span>
+      <strong>Guarda una copia fuera del equipo</strong>
+      <small>Descarga un respaldo cada semana a una memoria USB o a la nube. Si el computador se daña, los respaldos de esta lista se pierden con él.</small>
+    </div>
+  </div>
+
+  <div class="backups-card">
+    <div class="table-toolbar">
+      <h3>Respaldos guardados</h3>
+      <span class="count">{{ backups.length }}</span>
+    </div>
+
+    <div class="table-container">
+      <table class="backups-table">
+        <thead>
+          <tr>
+            <th>FECHA</th>
+            <th>TIPO</th>
+            <th>TAMAÑO</th>
+            <th>ARCHIVO</th>
+            <th class="actions-column"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="loading">
+            <td colspan="5" class="table-message">Cargando respaldos...</td>
+          </tr>
+          <tr *ngIf="!loading && backups.length === 0">
+            <td colspan="5" class="table-message">Todavía no hay respaldos.</td>
+          </tr>
+          <tr *ngFor="let backup of backups">
+            <td>{{ formatDate(backup.createdAt) }}</td>
+            <td>
+              <span class="type-badge" [ngClass]="'type-' + backup.type">{{ typeLabel(backup.type) }}</span>
+            </td>
+            <td>{{ formatSize(backup.sizeBytes) }}</td>
+            <td class="file-name">{{ backup.fileName }}</td>
+            <td class="actions-column">
+              <button
+                type="button"
+                class="secondary-button"
+                (click)="download(backup)"
+                [disabled]="downloading === backup.fileName"
+              >
+                {{ downloading === backup.fileName ? 'Descargando...' : 'Descargar' }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

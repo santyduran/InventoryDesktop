@@ -10,6 +10,7 @@ import { ProductsModule } from './products/products.module.js';
 import { InventoryModule } from './inventory/inventory.module.js';
 import { UsersModule } from './users/users.module.js';
 import { ProvidersModule } from './providers/providers.module.js';
+import { BackupsModule } from './backups/backups.module.js';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ProvidersModule } from './providers/providers.module.js';
     InventoryModule,
     UsersModule,
     ProvidersModule,
+    BackupsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

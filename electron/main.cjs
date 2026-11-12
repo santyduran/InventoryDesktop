@@ -52,11 +52,13 @@ function getProductionPaths() {
 
   const dataDirectory = path.join(applicationDirectory, 'data');
   const configDirectory = path.join(applicationDirectory, 'config');
+  const backupDirectory = path.join(applicationDirectory, 'backups');
 
   return {
     applicationDirectory,
     dataDirectory,
     configDirectory,
+    backupDirectory,
     database: path.join(dataDirectory, 'inventory.db'),
     jwtSecret: path.join(configDirectory, 'jwt-secret'),
   };
@@ -67,36 +69,11 @@ function prepareProductionEnvironment() {
 
   fs.mkdirSync(paths.dataDirectory, { recursive: true });
   fs.mkdirSync(paths.configDirectory, { recursive: true });
+  fs.mkdirSync(paths.backupDirectory, { recursive: true });
 
-  // Crear la base de datos únicamente en una instalación nueva.
-  // Nunca sobrescribir una base de datos que ya tenga información.
-  if (!fs.existsSync(paths.database)) {
-    const templateDatabase = app.isPackaged
-      ? path.join(
-          process.resourcesPath,
-          'database-template',
-          'inventory.db',
-        )
-      : path.resolve(
-          __dirname,
-          '..',
-          'release',
-          'database-template',
-          'inventory.db',
-        );
-
-    if (!fs.existsSync(templateDatabase)) {
-      throw new Error(
-        `No se encontró la plantilla inicial de la base de datos: ${templateDatabase}`,
-      );
-    }
-
-    fs.copyFileSync(templateDatabase, paths.database);
-
-    console.log('Base de datos inicial creada correctamente.');
-  } else {
-    console.log('Se conservará la base de datos existente.');
-  }
+  // La base de datos no se copia de ninguna plantilla: al arrancar, el backend
+  // la crea si no existe y aplica las migraciones pendientes (con un respaldo
+  // previo). Así una instalación existente se actualiza sola.
 
   let jwtSecret;
 
@@ -166,6 +143,7 @@ function startBackend() {
       ...process.env,
       DATABASE_URL: production.databaseUrl,
       JWT_SECRET: production.jwtSecret,
+      BACKUP_DIR: production.backupDirectory,
       PORT: String(PORT),
     };
 
@@ -176,6 +154,7 @@ function startBackend() {
     console.log(`Node.js: ${NODE_EXECUTABLE}`);
     console.log(`Backend: ${backend.entry}`);
     console.log(`Base de datos: ${production.database}`);
+    console.log(`Respaldos: ${production.backupDirectory}`);
 
     backendProcess = spawn(
       NODE_EXECUTABLE,

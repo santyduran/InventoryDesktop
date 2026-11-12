@@ -4,8 +4,13 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import type { CorsOptions } from 'cors';
 import { AppModule } from './app.module.js';
+import { applyPendingMigrations } from './database/migrate.js';
 
 async function bootstrap(): Promise<void> {
+  // Antes de abrir la base de datos: aplicar actualizaciones pendientes
+  // (con respaldo previo) o crearla desde cero en una instalación nueva.
+  await applyPendingMigrations();
+
   const app = await NestFactory.create(AppModule);
 
   app.enableShutdownHooks();

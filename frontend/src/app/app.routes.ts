@@ -1,6 +1,7 @@
 
 import { Routes } from '@angular/router';
 
+import { adminGuard } from './core/guards/admin.guard';
 import { authGuard } from './core/guards/auth.guard';
 import { MainLayout } from './layout/main-layout/main-layout';
 
@@ -61,9 +62,18 @@ export const routes: Routes = [
       },
       {
         path: 'users',
+        canActivate: [adminGuard],
         loadComponent: () =>
           import('./features/users/users').then(
             (module) => module.Users,
+          ),
+      },
+      {
+        path: 'backups',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/backups/backups').then(
+            (module) => module.Backups,
           ),
       },
       {

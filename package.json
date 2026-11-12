@@ -1,4 +1,3 @@
-
 {
   "name": "inventorydesktop",
   "version": "1.0.0",
@@ -59,10 +58,6 @@
       {
         "from": "electron/runtime/node/node.exe",
         "to": "node/node.exe"
-      },
-      {
-        "from": "release/database-template",
-        "to": "database-template"
       }
     ],
     "win": {
