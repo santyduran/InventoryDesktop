@@ -20,7 +20,8 @@
     "test:cov": "vitest run --coverage",
     "test:debug": "vitest --inspect-brk --no-file-parallelism",
     "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
-    "create:admin": "tsx src/users/create-admin.ts"
+    "create:admin": "tsx src/users/create-admin.ts",
+    "seed:demo": "tsx src/seed/demo-seed.ts"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.1",
