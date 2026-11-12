@@ -4,100 +4,220 @@
   <div class="welcome-section">
     <div>
       <span class="section-label">RESUMEN GENERAL</span>
-      <h2>Bienvenido a InventoryDesktop</h2>
-      <p>
-        Administra los productos y controla los movimientos
-        de inventario de tu taller.
-      </p>
+      <h2>{{ firstName ? 'Hola, ' + firstName : 'Bienvenido a El Marino' }}</h2>
+      <p class="today">{{ today }}</p>
+    </div>
+
+    <div class="quick-actions">
+      <a routerLink="/inventory-movements" class="action-button primary">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M7 20V4" /><path d="m3 8 4-4 4 4" />
+          <path d="M17 4v16" /><path d="m13 16 4 4 4-4" />
+        </svg>
+        Registrar movimiento
+      </a>
+      <a routerLink="/products" class="action-button">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M21 8 12 3 3 8l9 5 9-5Z" /><path d="M3 8v8l9 5 9-5V8" /><path d="M12 13v8" />
+        </svg>
+        Ver productos
+      </a>
     </div>
   </div>
 
-  <div class="section-heading">
-    <div>
-      <h3>Indicadores del inventario</h3>
-      <p>Información general de tu operación.</p>
-    </div>
+  <div class="error-banner" *ngIf="errorMessage">
+    <span>{{ errorMessage }}</span>
+    <button type="button" (click)="loadData()">Reintentar</button>
   </div>
 
-  <div class="indicators-grid">
+  <div class="indicators-grid" [class.is-loading]="loading">
 
     <article class="indicator-card">
       <div class="indicator-top">
-        <span class="indicator-icon products-icon">▣</span>
-        <span class="indicator-status">Pendiente</span>
+        <span class="indicator-icon products-icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M21 8 12 3 3 8l9 5 9-5Z" /><path d="M3 8v8l9 5 9-5V8" /><path d="M12 13v8" />
+          </svg>
+        </span>
       </div>
-      <span class="indicator-title">Total de productos</span>
-      <strong class="indicator-value">—</strong>
-      <span class="indicator-description">Datos pendientes de conexión</span>
+      <span class="indicator-title">Productos activos</span>
+      <strong class="indicator-value">{{ loading ? '…' : formatNumber(activeProducts) }}</strong>
+      <span class="indicator-description">
+        {{ inactiveProducts }} {{ inactiveProducts === 1 ? 'inactivo' : 'inactivos' }}
+      </span>
     </article>
 
     <article class="indicator-card">
       <div class="indicator-top">
-        <span class="indicator-icon stock-icon">▤</span>
-        <span class="indicator-status">Pendiente</span>
+        <span class="indicator-icon value-icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="2.5" y="6" width="19" height="12" rx="2" />
+            <circle cx="12" cy="12" r="2.5" />
+            <path d="M6 9.5v5M18 9.5v5" />
+          </svg>
+        </span>
+      </div>
+      <span class="indicator-title">Valor del inventario</span>
+      <strong class="indicator-value">{{ loading ? '…' : formatCurrency(inventoryValue) }}</strong>
+      <span class="indicator-description">Existencias × precio de compra</span>
+    </article>
+
+    <article class="indicator-card">
+      <div class="indicator-top">
+        <span class="indicator-icon stock-icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+            <path d="M12 9v4" /><path d="M12 17h.01" />
+          </svg>
+        </span>
+        <span
+          *ngIf="!loading"
+          class="indicator-status"
+          [class.warning]="lowStockProducts.length > 0"
+          [class.ok]="lowStockProducts.length === 0"
+        >
+          {{ lowStockProducts.length > 0 ? 'Revisar' : 'Al día' }}
+        </span>
       </div>
       <span class="indicator-title">Stock bajo</span>
-      <strong class="indicator-value">—</strong>
-      <span class="indicator-description">Productos por debajo del mínimo</span>
+      <strong class="indicator-value">{{ loading ? '…' : lowStockProducts.length }}</strong>
+      <span class="indicator-description">
+        {{ outOfStockCount }} {{ outOfStockCount === 1 ? 'agotado' : 'agotados' }}
+      </span>
     </article>
 
     <article class="indicator-card">
       <div class="indicator-top">
-        <span class="indicator-icon entries-icon">↓</span>
-        <span class="indicator-status">Pendiente</span>
+        <span class="indicator-icon movements-icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="3" y="4.5" width="18" height="16.5" rx="2" />
+            <path d="M3 9.5h18M8 3v3M16 3v3" />
+          </svg>
+        </span>
       </div>
-      <span class="indicator-title">Entradas de inventario</span>
-      <strong class="indicator-value">—</strong>
-      <span class="indicator-description">Movimientos de entrada</span>
-    </article>
-
-    <article class="indicator-card">
-      <div class="indicator-top">
-        <span class="indicator-icon exits-icon">↑</span>
-        <span class="indicator-status">Pendiente</span>
+      <span class="indicator-title">Movimientos de {{ monthName }}</span>
+      <div class="indicator-split">
+        <span class="split-item entry">
+          <small>Entradas</small>
+          <strong>{{ loading ? '…' : (monthEntriesUnits ? '+' : '') + formatNumber(monthEntriesUnits) }}</strong>
+        </span>
+        <span class="split-item exit">
+          <small>Salidas</small>
+          <strong>{{ loading ? '…' : (monthExitsUnits ? '−' : '') + formatNumber(monthExitsUnits) }}</strong>
+        </span>
       </div>
-      <span class="indicator-title">Salidas de inventario</span>
-      <strong class="indicator-value">—</strong>
-      <span class="indicator-description">Movimientos de salida</span>
+      <span class="indicator-description">
+        Unidades · {{ monthEntriesCount + monthExitsCount }}
+        {{ monthEntriesCount + monthExitsCount === 1 ? 'movimiento' : 'movimientos' }}
+      </span>
     </article>
 
   </div>
 
-  <section class="activity-card">
-    <div class="activity-heading">
-      <div>
-        <h3>Actividad reciente</h3>
-        <p>Últimos movimientos registrados en el inventario.</p>
+  <div class="panels-grid">
+
+    <section class="panel">
+      <div class="panel-heading">
+        <div>
+          <h3>Actividad reciente</h3>
+          <p>Últimos movimientos registrados en el inventario.</p>
+        </div>
+        <a routerLink="/inventory-movements" class="panel-link">Ver todos</a>
       </div>
 
-      <span class="pending-label">Pendiente de conexión</span>
-    </div>
+      <div class="panel-message" *ngIf="loading">Cargando…</div>
 
-    <div class="empty-state">
-      <div class="empty-icon">
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path
-            d="M8 6h13M8 12h13M8 18h13"
-            stroke="currentColor"
-            stroke-width="1.7"
-            stroke-linecap="round"
-          />
-          <circle cx="3" cy="6" r="1" fill="currentColor"/>
-          <circle cx="3" cy="12" r="1" fill="currentColor"/>
-          <circle cx="3" cy="18" r="1" fill="currentColor"/>
-        </svg>
+      <div class="empty-state" *ngIf="!loading && recentMovements.length === 0">
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M8 6h13M8 12h13M8 18h13" />
+            <path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01" />
+          </svg>
+        </div>
+        <h4>Sin movimientos para mostrar</h4>
+        <p>Cuando se registren entradas o salidas, aparecerán aquí.</p>
       </div>
 
-      <h4>Sin movimientos para mostrar</h4>
-      <p>
-        Cuando se registren entradas o salidas,
-        aparecerán aquí.
+      <ul class="activity-list" *ngIf="!loading && recentMovements.length > 0">
+        <li *ngFor="let movement of recentMovements">
+          <span
+            class="movement-badge"
+            [class.entry]="movement.movementType === 'ENTRY'"
+            [class.exit]="movement.movementType !== 'ENTRY'"
+            [attr.title]="movement.movementType === 'ENTRY' ? 'Entrada' : 'Salida'"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path *ngIf="movement.movementType === 'ENTRY'" d="M12 5v14m-6-6 6 6 6-6" />
+              <path *ngIf="movement.movementType !== 'ENTRY'" d="M12 19V5m-6 6 6-6 6 6" />
+            </svg>
+          </span>
+
+          <div class="activity-main">
+            <strong>{{ movement.product?.name ?? 'Producto' }}</strong>
+            <span>
+              {{ movement.product?.code }} · {{ movement.user?.fullName ?? 'Usuario' }}
+            </span>
+          </div>
+
+          <div class="activity-side">
+            <strong
+              [class.entry]="movement.movementType === 'ENTRY'"
+              [class.exit]="movement.movementType !== 'ENTRY'"
+            >
+              {{ movement.movementType === 'ENTRY' ? '+' : '−' }}{{ formatNumber(movement.quantity) }}
+            </strong>
+            <span>{{ formatDate(movement.createdAt) }}</span>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading">
+        <div>
+          <h3>Por reponer</h3>
+          <p>Productos en o por debajo del stock mínimo.</p>
+        </div>
+        <a routerLink="/products" class="panel-link">Ver productos</a>
+      </div>
+
+      <div class="panel-message" *ngIf="loading">Cargando…</div>
+
+      <div class="empty-state" *ngIf="!loading && lowStockProducts.length === 0">
+        <div class="empty-icon ok">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m5 12.5 4.5 4.5L19 7.5" />
+          </svg>
+        </div>
+        <h4>Todo el inventario está al día</h4>
+        <p>Ningún producto activo está por debajo de su stock mínimo.</p>
+      </div>
+
+      <ul class="stock-list" *ngIf="!loading && lowStockProducts.length > 0">
+        <li *ngFor="let product of visibleLowStock">
+          <div class="activity-main">
+            <strong>{{ product.name }}</strong>
+            <span>{{ product.code }} · {{ product.category?.name ?? 'Sin categoría' }}</span>
+          </div>
+
+          <div class="stock-side">
+            <span class="stock-pill" [class.empty]="product.stock === 0">
+              {{ product.stock === 0 ? 'Agotado' : formatNumber(product.stock) + ' disp.' }}
+            </span>
+            <span>Mínimo {{ formatNumber(product.minimumStock) }}</span>
+          </div>
+        </li>
+      </ul>
+
+      <p class="panel-more" *ngIf="!loading && lowStockProducts.length > visibleLowStock.length">
+        y {{ lowStockProducts.length - visibleLowStock.length }} más
       </p>
-    </div>
-  </section>
+    </section>
+
+  </div>
 
   <footer class="dashboard-footer">
-    InventoryDesktop · Sistema de gestión de inventario
+    El Marino · Taller de Motos · Sistema de inventario
   </footer>
 
 </section>
