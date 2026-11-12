@@ -9,9 +9,10 @@ import {
   Min,
   Max,
 } from 'class-validator';
+import { IsOptionalNotNull } from '../../common/validators/is-optional-not-null.js';
 
 export class UpdateProductDto {
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsString()
   @MaxLength(50)
   code?: string;
@@ -21,7 +22,7 @@ export class UpdateProductDto {
   @MaxLength(100)
   barcode?: string | null;
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsString()
   @MaxLength(120)
   name?: string;
@@ -31,42 +32,39 @@ export class UpdateProductDto {
   @MaxLength(500)
   description?: string | null;
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsString()
   categoryId?: string;
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsInt()
   @Min(0)
   purchasePrice?: number;
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsInt()
   @Min(0)
   salePrice?: number;
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsString()
   @IsIn(['GENERAL', 'EXENTO', 'EXCLUIDO'])
   taxType?: string;
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsInt()
   @Min(0)
   @Max(10000)
   taxRate?: number;
 
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  stock?: number;
+  // El stock no se edita aquí: solo cambia con movimientos de inventario.
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsInt()
   @Min(0)
   minimumStock?: number;
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsBoolean()
   isActive?: boolean;
 }

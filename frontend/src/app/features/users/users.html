@@ -200,9 +200,9 @@
             type="password"
             name="password"
             [(ngModel)]="form.password"
-            [placeholder]="editingId ? 'Dejar vacío para conservar la actual' : 'Mínimo 8 caracteres'"
+            [placeholder]="editingId ? 'Dejar vacío para conservar la actual' : 'Mínimo 12 caracteres'"
             [required]="!editingId"
-            minlength="8"
+            minlength="12"
             autocomplete="new-password"
           />
           <small *ngIf="editingId">

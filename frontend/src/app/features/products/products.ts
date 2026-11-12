@@ -207,9 +207,10 @@ export class Products implements OnInit {
     const request = this.editingProductId
       ? this.productService.updateProduct(this.editingProductId, {
           code: payload.code,
-          barcode: payload.barcode,
+          // Vacío = borrar el valor (el backend lo guarda como null).
+          barcode: this.form.barcode.trim(),
           name: payload.name,
-          description: payload.description,
+          description: this.form.description.trim(),
           categoryId: payload.categoryId,
           purchasePrice: payload.purchasePrice,
           salePrice: payload.salePrice,

@@ -29,6 +29,14 @@ export class ProductsService {
     }
   }
 
+  /**
+   * Los productos exentos o excluidos de IVA no llevan tarifa:
+   * en ese caso la tarifa siempre se guarda en 0.
+   */
+  private resolveTaxRate(taxType: string, taxRate: number): number {
+    return taxType === 'GENERAL' ? taxRate : 0;
+  }
+
   private handleDatabaseError(error: unknown): never {
     const databaseError = error as { code?: string };
 
@@ -41,7 +49,7 @@ export class ProductsService {
     throw error;
   }
 
-  async create(dto: CreateProductDto) {
+  async create(dto: CreateProductDto, userId: string) {
     const code = dto.code.trim();
     const name = dto.name.trim();
 
@@ -55,24 +63,50 @@ export class ProductsService {
 
     const barcode = dto.barcode?.trim() || null;
 
+    const initialStock = dto.stock ?? 0;
+
     try {
-      return await this.prisma.product.create({
-        data: {
-          code,
-          barcode,
-          name,
-          description: dto.description?.trim() || null,
-          categoryId: dto.categoryId,
-          purchasePrice: dto.purchasePrice,
-          salePrice: dto.salePrice,
-          taxType: dto.taxType ?? 'GENERAL',
-          taxRate: dto.taxRate ?? 1900,
-          stock: dto.stock ?? 0,
-          minimumStock: dto.minimumStock ?? 0,
-        },
-        include: {
-          category: true,
-        },
+      // El producto y su stock inicial se guardan juntos: si hay existencias
+      // iniciales, quedan registradas como un movimiento de entrada.
+      return await this.prisma.$transaction(async (transaction) => {
+        const product = await transaction.product.create({
+          data: {
+            code,
+            barcode,
+            name,
+            description: dto.description?.trim() || null,
+            categoryId: dto.categoryId,
+            purchasePrice: dto.purchasePrice,
+            salePrice: dto.salePrice,
+            taxType: dto.taxType ?? 'GENERAL',
+            taxRate: this.resolveTaxRate(
+              dto.taxType ?? 'GENERAL',
+              dto.taxRate ?? 1900,
+            ),
+            stock: initialStock,
+            minimumStock: dto.minimumStock ?? 0,
+          },
+          include: {
+            category: true,
+          },
+        });
+
+        if (initialStock > 0) {
+          await transaction.inventoryMovement.create({
+            data: {
+              productId: product.id,
+              userId,
+              movementType: 'ENTRY',
+              quantity: initialStock,
+              stockBefore: 0,
+              stockAfter: initialStock,
+              referenceType: 'ADJUSTMENT',
+              observations: 'Stock inicial al crear el producto',
+            },
+          });
+        }
+
+        return product;
       });
     } catch (error) {
       this.handleDatabaseError(error);
@@ -106,7 +140,7 @@ export class ProductsService {
   }
 
   async update(id: string, dto: UpdateProductDto) {
-    await this.findOne(id);
+    const current = await this.findOne(id);
 
     const data: {
       code?: string;
@@ -118,7 +152,6 @@ export class ProductsService {
       salePrice?: number;
       taxType?: string;
       taxRate?: number;
-      stock?: number;
       minimumStock?: number;
       isActive?: boolean;
     } = {};
@@ -155,7 +188,9 @@ export class ProductsService {
       data.description = dto.description?.trim() || null;
     }
 
-    if (dto.categoryId !== undefined) {
+    // Solo se valida si la categoría cambia; así se puede seguir editando
+    // un producto cuya categoría se desactivó después.
+    if (dto.categoryId !== undefined && dto.categoryId !== current.categoryId) {
       await this.validateCategory(dto.categoryId);
       data.categoryId = dto.categoryId;
     }
@@ -176,8 +211,10 @@ export class ProductsService {
       data.taxRate = dto.taxRate;
     }
 
-    if (dto.stock !== undefined) {
-      data.stock = dto.stock;
+    const effectiveTaxType = data.taxType ?? current.taxType;
+
+    if (effectiveTaxType !== 'GENERAL') {
+      data.taxRate = 0;
     }
 
     if (dto.minimumStock !== undefined) {

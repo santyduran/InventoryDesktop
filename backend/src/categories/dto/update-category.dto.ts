@@ -5,9 +5,10 @@ import {
   IsString,
   MaxLength,
 } from 'class-validator';
+import { IsOptionalNotNull } from '../../common/validators/is-optional-not-null.js';
 
 export class UpdateCategoryDto {
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsString()
   @MaxLength(80, {
     message: 'El nombre no puede superar los 80 caracteres.',
@@ -21,7 +22,7 @@ export class UpdateCategoryDto {
   })
   description?: string;
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsBoolean()
   isActive?: boolean;
 }

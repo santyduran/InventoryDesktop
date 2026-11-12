@@ -6,14 +6,15 @@ import {
   MaxLength,
   IsBoolean,
 } from 'class-validator';
+import { IsOptionalNotNull } from '../../common/validators/is-optional-not-null.js';
 
 export class UpdateProviderDto {
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsString()
   @MaxLength(150)
   businessName?: string;
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsString()
   @MaxLength(30)
   nit?: string;
@@ -63,7 +64,7 @@ export class UpdateProviderDto {
   @MaxLength(500)
   observations?: string;
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsBoolean()
   isActive?: boolean;
 }

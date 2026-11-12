@@ -133,8 +133,8 @@ export class Users implements OnInit {
       return;
     }
 
-    if (password.trim() && password.length < 8) {
-      this.errorMessage = 'La contraseña debe tener al menos 8 caracteres.';
+    if (password.trim() && password.length < 12) {
+      this.errorMessage = 'La contraseña debe tener al menos 12 caracteres.';
       return;
     }
 

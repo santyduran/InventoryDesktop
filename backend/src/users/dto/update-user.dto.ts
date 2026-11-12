@@ -3,34 +3,34 @@ import {
   IsBoolean,
   IsEmail,
   IsIn,
-  IsOptional,
   IsString,
   MaxLength,
   MinLength,
 } from 'class-validator';
+import { IsOptionalNotNull } from '../../common/validators/is-optional-not-null.js';
 
 export class UpdateUserDto {
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsString()
   @MaxLength(100)
   fullName?: string;
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsEmail()
   @MaxLength(50)
   username?: string;
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsString()
   @MinLength(12)
   @MaxLength(128)
   password?: string;
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsIn(['ADMIN', 'OPERADOR'])
   role?: 'ADMIN' | 'OPERADOR';
 
-  @IsOptional()
+  @IsOptionalNotNull()
   @IsBoolean()
   isActive?: boolean;
 }

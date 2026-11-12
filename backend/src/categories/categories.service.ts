@@ -1,5 +1,6 @@
 
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -15,6 +16,12 @@ export class CategoriesService {
 
   async create(dto: CreateCategoryDto) {
     const name = dto.name.trim();
+
+    if (!name) {
+      throw new BadRequestException(
+        'El nombre de la categoría es obligatorio.',
+      );
+    }
 
     const existingCategory = await this.prisma.category.findUnique({
       where: { name },
@@ -100,7 +107,7 @@ export class CategoriesService {
     }
 
     if (dto.description !== undefined) {
-      data.description = dto.description.trim() || null;
+      data.description = dto.description?.trim() || null;
     }
 
     if (dto.isActive !== undefined) {
