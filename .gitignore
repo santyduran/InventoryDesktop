@@ -39,3 +39,5 @@ Thumbs.db
 
 # Runtime de Node.js incluido en el instalador
 electron/runtime/node/
+# Credenciales y notas locales (nunca se suben)
+*.local.md
