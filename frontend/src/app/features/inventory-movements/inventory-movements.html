@@ -55,14 +55,21 @@
 
     <div class="table-container">
       <table class="movements-table">
+        <colgroup>
+          <col class="col-date" />
+          <col class="col-product" />
+          <col class="col-movement" />
+          <col class="col-stock" />
+          <col class="col-user" />
+          <col class="col-notes" />
+        </colgroup>
+
         <thead>
           <tr>
             <th>FECHA</th>
             <th>PRODUCTO</th>
-            <th>TIPO</th>
-            <th>CANTIDAD</th>
-            <th>STOCK ANTERIOR</th>
-            <th>STOCK RESULTANTE</th>
+            <th>MOVIMIENTO</th>
+            <th>STOCK</th>
             <th>RESPONSABLE</th>
             <th>OBSERVACIONES</th>
           </tr>
@@ -70,19 +77,22 @@
 
         <tbody>
           <tr *ngIf="loading">
-            <td colspan="8" class="table-message">
+            <td colspan="6" class="table-message">
               Cargando movimientos...
             </td>
           </tr>
 
           <tr *ngIf="!loading && filteredMovements.length === 0">
-            <td colspan="8" class="table-message">
+            <td colspan="6" class="table-message">
               No se encontraron movimientos de inventario.
             </td>
           </tr>
 
           <tr *ngFor="let movement of filteredMovements">
-            <td>{{ formatDate(movement.createdAt) }}</td>
+            <td class="date-cell" [attr.title]="formatDate(movement.createdAt)">
+              <span class="date-day">{{ formatDay(movement.createdAt) }}</span>
+              <span class="date-time">{{ formatTime(movement.createdAt) }}</span>
+            </td>
 
             <td>
               <div class="product-information">
@@ -92,29 +102,33 @@
             </td>
 
             <td>
-              <span
-                class="movement-badge"
-                [class.entry-badge]="movement.movementType === 'ENTRY'"
-                [class.exit-badge]="movement.movementType === 'EXIT'"
-              >
-                {{ movement.movementType === 'ENTRY' ? 'Entrada' : 'Salida' }}
-              </span>
+              <div class="movement-information">
+                <span
+                  class="movement-badge"
+                  [class.entry-badge]="movement.movementType === 'ENTRY'"
+                  [class.exit-badge]="movement.movementType === 'EXIT'"
+                >
+                  {{ movement.movementType === 'ENTRY' ? 'Entrada' : 'Salida' }}
+                </span>
+                <strong
+                  [class.entry-quantity]="movement.movementType === 'ENTRY'"
+                  [class.exit-quantity]="movement.movementType === 'EXIT'"
+                >
+                  {{ movement.movementType === 'ENTRY' ? '+' : '−' }}{{ movement.quantity }}
+                </strong>
+              </div>
             </td>
 
-            <td>
-              <strong
-                [class.entry-quantity]="movement.movementType === 'ENTRY'"
-                [class.exit-quantity]="movement.movementType === 'EXIT'"
-              >
-                {{ movement.movementType === 'ENTRY' ? '+' : '-' }}{{ movement.quantity }}
-              </strong>
+            <td class="stock-cell" [attr.title]="'Antes: ' + movement.stockBefore + ' · Después: ' + movement.stockAfter">
+              <span class="stock-before">{{ movement.stockBefore }}</span>
+              <span class="stock-arrow" aria-hidden="true">→</span>
+              <strong>{{ movement.stockAfter }}</strong>
             </td>
 
-            <td>{{ movement.stockBefore }}</td>
-            <td>{{ movement.stockAfter }}</td>
             <td>{{ movement.user?.fullName || '—' }}</td>
-            <td class="observations-cell">
-              {{ movement.observations || '—' }}
+
+            <td [attr.title]="movement.observations || null">
+              <div class="observations-text">{{ movement.observations || '—' }}</div>
             </td>
           </tr>
         </tbody>

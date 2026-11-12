@@ -1,7 +1,6 @@
 
 :host {
   display: block;
-  font-family: Arial, Helvetica, sans-serif;
   color: #172c3a;
 }
 
@@ -178,30 +177,77 @@
 
 .table-container {
   width: 100%;
+  // Respaldo para ventanas muy estrechas; en tamaños normales la tabla cabe.
   overflow-x: auto;
 }
 
 .movements-table {
   width: 100%;
+  min-width: 760px;
+  table-layout: fixed;
   border-collapse: collapse;
   text-align: left;
 
+  .col-date {
+    width: 13%;
+  }
+
+  .col-product {
+    width: 25%;
+  }
+
+  .col-movement {
+    width: 15%;
+  }
+
+  .col-stock {
+    width: 10%;
+  }
+
+  .col-user {
+    width: 14%;
+  }
+
+  .col-notes {
+    width: 23%;
+  }
+
   th {
-    padding: 13px 15px;
+    padding: 13px 14px;
     background: #f8fafb;
     color: #82919a;
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 600;
     letter-spacing: 0.5px;
     white-space: nowrap;
   }
 
   td {
-    padding: 14px 15px;
+    padding: 13px 14px;
     border-bottom: 1px solid #edf0f2;
     color: #52636e;
-    font-size: 11px;
+    font-size: 13px;
+    vertical-align: middle;
+    overflow-wrap: anywhere;
+  }
+
+  .date-cell {
     white-space: nowrap;
+
+    span {
+      display: block;
+    }
+
+    .date-day {
+      color: #3f525e;
+      font-size: 13px;
+    }
+
+    .date-time {
+      margin-top: 3px;
+      color: #8a979f;
+      font-size: 12px;
+    }
   }
 
   tbody tr:last-child td {
@@ -220,22 +266,51 @@
 
   strong {
     color: #263d4b;
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 600;
+    line-height: 1.35;
   }
 
   small {
     color: #89969e;
-    font-size: 10px;
+    font-size: 11px;
+  }
+}
+
+.movement-information {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+
+  strong {
+    font-size: 14px;
   }
 }
 
 .movement-badge {
   display: inline-block;
-  padding: 5px 9px;
+  padding: 4px 9px;
   border-radius: 12px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
+}
+
+.stock-cell {
+  white-space: nowrap;
+
+  .stock-before {
+    color: #8a979f;
+  }
+
+  .stock-arrow {
+    margin: 0 6px;
+    color: #b0bcc3;
+  }
+
+  strong {
+    color: #263d4b;
+  }
 }
 
 .entry-badge {
@@ -256,10 +331,16 @@
   color: #b64c3b;
 }
 
-.observations-cell {
-  max-width: 220px;
+// Hasta dos líneas; el texto completo aparece al pasar el ratón.
+.observations-text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
   overflow: hidden;
-  text-overflow: ellipsis;
+  color: #6b7b85;
+  font-size: 12px;
+  line-height: 1.45;
 }
 
 .table-message {

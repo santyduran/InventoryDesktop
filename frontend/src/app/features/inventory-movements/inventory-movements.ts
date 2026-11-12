@@ -216,6 +216,25 @@ export class InventoryMovements implements OnInit {
     }).format(new Date(date));
   }
 
+  /** "09 nov 2026" */
+  formatDay(date: string): string {
+    return new Intl.DateTimeFormat('es-CO', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    })
+      .format(new Date(date))
+      .replace(/ de /g, ' ');
+  }
+
+  /** "10:56 a. m." */
+  formatTime(date: string): string {
+    return new Intl.DateTimeFormat('es-CO', {
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(new Date(date));
+  }
+
   private emptyForm(): CreateInventoryMovementDto {
     return {
       productId: '',
