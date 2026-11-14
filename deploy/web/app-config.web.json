@@ -1,0 +1,8 @@
+{
+  "apiUrl": "/api",
+  "brand": {
+    "name": "Inventario",
+    "tagline": "",
+    "logo": "favicon.svg"
+  }
+}

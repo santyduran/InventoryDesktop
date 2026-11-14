@@ -45,3 +45,8 @@ Thumbs.db
 electron/runtime/node/
 # Credenciales y notas locales (nunca se suben)
 *.local.md
+
+# Versión web: configuración y marca de cada cliente (no se suben)
+deploy/web/.env
+deploy/web/marca/*
+!deploy/web/marca/app-config.example.json

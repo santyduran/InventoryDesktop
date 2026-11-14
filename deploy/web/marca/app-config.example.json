@@ -1,0 +1,8 @@
+{
+  "apiUrl": "/api",
+  "brand": {
+    "name": "Nombre del negocio",
+    "tagline": "Descripción corta",
+    "logo": "marca/logo.svg"
+  }
+}
