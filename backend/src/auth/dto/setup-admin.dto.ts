@@ -2,6 +2,7 @@
 import {
   IsEmail,
   IsNotEmpty,
+  IsOptional,
   IsString,
   MaxLength,
   MinLength,
@@ -21,4 +22,10 @@ export class SetupAdminDto {
   @MinLength(12)
   @MaxLength(128)
   password!: string;
+
+  /** Código de instalación; obligatorio solo si el servidor define SETUP_TOKEN. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  setupToken?: string;
 }

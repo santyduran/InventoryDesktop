@@ -44,8 +44,11 @@ export class AuthController {
    */
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  login(@Body() dto: LoginDto) {
-    return this.authService.login(dto);
+  login(
+    @Body() dto: LoginDto,
+    @Req() request: { ip?: string },
+  ) {
+    return this.authService.login(dto, request.ip ?? 'desconocida');
   }
 
   /**
