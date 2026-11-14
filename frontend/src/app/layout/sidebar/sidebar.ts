@@ -3,6 +3,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { brandFullName, getAppConfig } from '../../core/config/app-config';
 
 @Component({
   selector: 'app-sidebar',
@@ -12,6 +13,9 @@ import { AuthService } from '../../core/services/auth.service';
   styleUrl: './sidebar.scss',
 })
 export class Sidebar {
+  readonly brand = getAppConfig().brand;
+  readonly brandName = brandFullName();
+
   private readonly authService = inject(AuthService);
 
   get isAdmin(): boolean {

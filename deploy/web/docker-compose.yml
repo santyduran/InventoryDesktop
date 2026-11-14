@@ -1,0 +1,40 @@
+# Versión web para un cliente: un servidor, su base de datos y su dominio.
+# Uso: ver deploy/web/README.md
+name: inventario-${CLIENTE:-web}
+
+services:
+  backend:
+    build:
+      context: ../..
+      dockerfile: deploy/web/backend.Dockerfile
+    restart: unless-stopped
+    environment:
+      JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET en .env}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-12h}
+      SETUP_TOKEN: ${SETUP_TOKEN:?Define SETUP_TOKEN en .env}
+    volumes:
+      - datos:/data
+
+  web:
+    build:
+      context: ../..
+      dockerfile: deploy/web/web.Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+      # Si existe marca/app-config.json se usa ese; si no, el genérico.
+      APP_CONFIG_PATH: ${APP_CONFIG_PATH:-/app-config.json}
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    volumes:
+      - ./marca:/srv/marca:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  datos:
+  caddy_data:
+  caddy_config:

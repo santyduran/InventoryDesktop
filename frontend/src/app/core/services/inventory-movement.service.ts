@@ -3,6 +3,8 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+import { getAppConfig } from '../config/app-config';
+
 export interface InventoryMovement {
   id: string;
   productId: string;
@@ -39,7 +41,7 @@ export interface CreateInventoryMovementDto {
 })
 export class InventoryMovementService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://127.0.0.1:3000/inventory/movements';
+  private readonly apiUrl = `${getAppConfig().apiUrl}/inventory/movements`;
 
   getMovements(): Observable<InventoryMovement[]> {
     return this.http.get<InventoryMovement[]>(this.apiUrl);

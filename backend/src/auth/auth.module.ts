@@ -5,6 +5,7 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
 import { JwtStrategy } from './strategies/jwt.strategy.js';
+import { LoginThrottleService } from './login-throttle.service.js';
 
 const DEFAULT_TOKEN_TTL_SECONDS = 15 * 60;
 
@@ -62,7 +63,7 @@ function getTokenTtlSeconds(): number {
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, LoginThrottleService],
   exports: [AuthService],
 })
 export class AuthModule {}

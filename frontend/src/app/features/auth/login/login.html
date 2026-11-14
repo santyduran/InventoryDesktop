@@ -8,8 +8,8 @@
       <div class="brand">
         <img
           class="brand-logo"
-          src="logo-el-marino.svg"
-          alt="El Marino · Taller de Motos"
+          [src]="brand.logo"
+          [alt]="brandName"
           width="200"
           height="175"
         />
@@ -173,7 +173,7 @@
     </section>
 
     <footer>
-      El Marino · Taller de Motos · Sistema de inventario
+      {{ brandName }} · Sistema de inventario
     </footer>
   </main>
 </div>

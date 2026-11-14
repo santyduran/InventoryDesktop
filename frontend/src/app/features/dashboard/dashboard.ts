@@ -17,6 +17,7 @@ import {
   InventoryMovementService,
 } from '../../core/services/inventory-movement.service';
 import { Product, ProductService } from '../../core/services/product.service';
+import { brandFullName, getAppConfig } from '../../core/config/app-config';
 
 const RECENT_LIMIT = 6;
 const LOW_STOCK_LIMIT = 6;
@@ -29,6 +30,9 @@ const LOW_STOCK_LIMIT = 6;
   styleUrl: './dashboard.scss',
 })
 export class Dashboard implements OnInit {
+  readonly brand = getAppConfig().brand;
+  readonly brandName = brandFullName();
+
   private readonly productService = inject(ProductService);
   private readonly movementService = inject(InventoryMovementService);
   private readonly authService = inject(AuthService);

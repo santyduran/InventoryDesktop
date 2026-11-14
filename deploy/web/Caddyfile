@@ -1,0 +1,40 @@
+# DOMAIN: dominio del cliente (Caddy obtiene el certificado HTTPS solo).
+# Con "localhost" usa un certificado local, útil para probar.
+{$DOMAIN:localhost} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "same-origin"
+		-Server
+	}
+
+	# API: /api/products → backend:3000/products
+	handle_path /api/* {
+		reverse_proxy backend:3000
+	}
+
+	# Marca del cliente (logo y configuración), montada desde el servidor.
+	handle /marca/* {
+		root * /srv
+		file_server
+	}
+
+	handle /app-config.json {
+		header Cache-Control "no-cache"
+		root * /srv
+		rewrite * {$APP_CONFIG_PATH:/app-config.json}
+		file_server
+	}
+
+	# Aplicación: cualquier ruta que no sea un archivo carga la app.
+	handle {
+		root * /srv
+		try_files {path} /index.csr.html
+		@html path /index.csr.html
+		header @html Cache-Control "no-cache"
+		file_server
+	}
+}

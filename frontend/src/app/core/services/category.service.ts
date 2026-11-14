@@ -3,6 +3,8 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+import { getAppConfig } from '../config/app-config';
+
 export interface Category {
   id: string;
   name: string;
@@ -29,7 +31,7 @@ export type UpdateCategoryDto = Partial<CreateCategoryDto> & {
 })
 export class CategoryService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://127.0.0.1:3000/categories';
+  private readonly apiUrl = `${getAppConfig().apiUrl}/categories`;
 
   getCategories(): Observable<Category[]> {
     return this.http.get<Category[]>(this.apiUrl);

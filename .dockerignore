@@ -1,0 +1,16 @@
+# Contexto de Docker para deploy/web: solo el código fuente.
+.git
+**/node_modules
+**/dist
+**/.angular
+**/*.db
+**/*.db.tmp
+backups
+backend/backups
+**/.env
+**/*.local.md
+**/*.tsbuildinfo
+release
+electron
+deploy/web/.env
+deploy/web/marca

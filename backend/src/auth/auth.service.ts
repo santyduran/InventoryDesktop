@@ -1,6 +1,8 @@
+import { createHash, timingSafeEqual } from 'node:crypto';
 
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -11,13 +13,26 @@ import * as argon2 from 'argon2';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { LoginDto } from './dto/login.dto.js';
 import { SetupAdminDto } from './dto/setup-admin.dto.js';
+import { LoginThrottleService } from './login-throttle.service.js';
 import { UserRole } from '../common/enums/user-role.enum.js';
+
+function getSetupToken(): string | undefined {
+  return process.env.SETUP_TOKEN?.trim() || undefined;
+}
+
+function sameSecret(received: string, expected: string): boolean {
+  const a = createHash('sha256').update(received).digest();
+  const b = createHash('sha256').update(expected).digest();
+
+  return timingSafeEqual(a, b);
+}
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly loginThrottle: LoginThrottleService,
   ) {}
 
   /**
@@ -28,6 +43,7 @@ export class AuthService {
 
     return {
       requiresSetup: userCount === 0,
+      requiresSetupToken: !!getSetupToken(),
     };
   }
 
@@ -36,6 +52,14 @@ export class AuthService {
    * No permite registrar usuarios adicionales mediante esta ruta.
    */
   async setupAdmin(dto: SetupAdminDto) {
+    // En un servidor web la página de configuración inicial es pública:
+    // con SETUP_TOKEN, solo quien conozca ese código puede crear el admin.
+    const setupToken = getSetupToken();
+
+    if (setupToken && !sameSecret(dto.setupToken ?? '', setupToken)) {
+      throw new ForbiddenException('El código de instalación no es correcto.');
+    }
+
     const username = dto.username.trim().toLowerCase();
     const fullName = dto.fullName.trim();
 
@@ -108,25 +132,23 @@ export class AuthService {
   /**
    * Inicio de sesión habitual.
    */
-  async login(dto: LoginDto) {
-    const username = dto.username.trim();
+  async login(dto: LoginDto, ip = 'local') {
+    const username = dto.username.trim().toLowerCase();
+
+    this.loginThrottle.assertAllowed(ip, username);
 
     const user = await this.prisma.user.findUnique({
       where: { username },
     });
 
-    if (!user || !user.isActive) {
-      throw new UnauthorizedException(
-        'Usuario o contraseña incorrectos.',
-      );
-    }
+    const passwordIsValid =
+      !!user &&
+      user.isActive &&
+      (await argon2.verify(user.passwordHash, dto.password));
 
-    const passwordIsValid = await argon2.verify(
-      user.passwordHash,
-      dto.password,
-    );
+    if (!user || !passwordIsValid) {
+      this.loginThrottle.registerFailure(ip, username);
 
-    if (!passwordIsValid) {
       throw new UnauthorizedException(
         'Usuario o contraseña incorrectos.',
       );
@@ -145,6 +167,8 @@ export class AuthService {
     };
 
     const accessToken = await this.jwtService.signAsync(payload);
+
+    this.loginThrottle.registerSuccess(ip, username);
 
     return {
       accessToken,

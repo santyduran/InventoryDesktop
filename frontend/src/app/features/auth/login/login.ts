@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { AuthService } from '../../../core/services/auth.service';
+import { brandFullName, getAppConfig } from '../../../core/config/app-config';
 
 // Solo se recuerda el correo; la contraseña nunca se guarda.
 const REMEMBERED_USERNAME_KEY = 'inventory_remembered_username';
@@ -18,6 +19,9 @@ const REMEMBERED_USERNAME_KEY = 'inventory_remembered_username';
   styleUrl: './login.scss',
 })
 export class Login implements OnInit {
+  readonly brand = getAppConfig().brand;
+  readonly brandName = brandFullName();
+
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);

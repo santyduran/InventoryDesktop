@@ -3,6 +3,8 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+import { getAppConfig } from '../config/app-config';
+
 export interface User {
   id: string;
   fullName: string;
@@ -33,7 +35,7 @@ export interface UpdateUserDto {
 })
 export class UserService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://127.0.0.1:3000/users';
+  private readonly apiUrl = `${getAppConfig().apiUrl}/users`;
 
   getUsers(): Observable<User[]> {
     return this.http.get<User[]>(this.apiUrl);
