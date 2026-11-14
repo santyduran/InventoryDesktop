@@ -2,6 +2,8 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+import { getAppConfig } from '../config/app-config';
+
 export type BackupType = 'automatico' | 'manual' | 'pre-migracion';
 
 export interface Backup {
@@ -16,7 +18,7 @@ export interface Backup {
 })
 export class BackupService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://127.0.0.1:3000/backups';
+  private readonly apiUrl = `${getAppConfig().apiUrl}/backups`;
 
   getBackups(): Observable<Backup[]> {
     return this.http.get<Backup[]>(this.apiUrl);

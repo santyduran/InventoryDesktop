@@ -4,7 +4,7 @@
   <div class="welcome-section">
     <div>
       <span class="section-label">RESUMEN GENERAL</span>
-      <h2>{{ firstName ? 'Hola, ' + firstName : 'Bienvenido a El Marino' }}</h2>
+      <h2>{{ firstName ? 'Hola, ' + firstName : 'Bienvenido a ' + brand.name }}</h2>
       <p class="today">{{ today }}</p>
     </div>
 
@@ -217,7 +217,7 @@
   </div>
 
   <footer class="dashboard-footer">
-    El Marino · Taller de Motos · Sistema de inventario
+    {{ brandName }} · Sistema de inventario
   </footer>
 
 </section>

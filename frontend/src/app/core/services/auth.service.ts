@@ -4,6 +4,8 @@ import { inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 
+import { getAppConfig } from '../config/app-config';
+
 export interface AuthUser {
   id: string;
   fullName: string;
@@ -19,12 +21,15 @@ export interface LoginResponse {
 
 export interface SetupStatusResponse {
   requiresSetup: boolean;
+  /** El servidor pide un código de instalación (versión web). */
+  requiresSetupToken?: boolean;
 }
 
 export interface SetupAdminRequest {
   fullName: string;
   username: string;
   password: string;
+  setupToken?: string;
 }
 
 export interface SetupAdminResponse {
@@ -42,7 +47,7 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly platformId = inject(PLATFORM_ID);
 
-  private readonly apiUrl = 'http://127.0.0.1:3000/auth';
+  private readonly apiUrl = `${getAppConfig().apiUrl}/auth`;
 
   private readonly tokenKey = 'inventory_access_token';
   private readonly userKey = 'inventory_user';
@@ -73,6 +78,7 @@ export class AuthService {
         fullName: data.fullName.trim(),
         username: data.username.trim().toLowerCase(),
         password: data.password,
+        ...(data.setupToken ? { setupToken: data.setupToken.trim() } : {}),
       },
     );
   }

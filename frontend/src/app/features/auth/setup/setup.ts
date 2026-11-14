@@ -5,12 +5,14 @@ import {
   inject,
   OnInit,
   PLATFORM_ID,
+  signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
 import { AuthService } from '../../../core/services/auth.service';
+import { brandFullName, getAppConfig } from '../../../core/config/app-config';
 
 @Component({
   selector: 'app-setup',
@@ -20,6 +22,9 @@ import { AuthService } from '../../../core/services/auth.service';
   styleUrl: './setup.scss',
 })
 export class Setup implements OnInit {
+  readonly brand = getAppConfig().brand;
+  readonly brandName = brandFullName();
+
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly platformId = inject(PLATFORM_ID);
@@ -28,6 +33,9 @@ export class Setup implements OnInit {
   username = '';
   password = '';
   confirmPassword = '';
+  setupToken = '';
+  /** Señal: la respuesta llega fuera de la detección de cambios. */
+  readonly requiresSetupToken = signal(false);
 
   showPassword = false;
   showConfirmPassword = false;
@@ -49,6 +57,8 @@ export class Setup implements OnInit {
         if (!status.requiresSetup) {
           this.router.navigate(['/login']);
         }
+
+        this.requiresSetupToken.set(!!status.requiresSetupToken);
       },
       error: () => {
         this.errorMessage =
@@ -90,6 +100,7 @@ export class Setup implements OnInit {
       fullName,
       username,
       password: this.password,
+      setupToken: this.setupToken,
     }).subscribe({
       next: (response) => {
         this.loading = false;

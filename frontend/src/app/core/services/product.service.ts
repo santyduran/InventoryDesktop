@@ -3,6 +3,8 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+import { getAppConfig } from '../config/app-config';
+
 export interface ProductCategory {
   id: string;
   name: string;
@@ -51,7 +53,7 @@ export type UpdateProductDto = Partial<CreateProductDto> & {
 })
 export class ProductService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://127.0.0.1:3000';
+  private readonly apiUrl = getAppConfig().apiUrl;
 
   getProducts(): Observable<Product[]> {
     return this.http.get<Product[]>(`${this.apiUrl}/products`);

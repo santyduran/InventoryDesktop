@@ -3,6 +3,8 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+import { getAppConfig } from '../config/app-config';
+
 export interface Provider {
   id: string;
   businessName: string;
@@ -47,7 +49,7 @@ export type UpdateProviderDto = Partial<CreateProviderDto> & {
 })
 export class ProviderService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://127.0.0.1:3000/providers';
+  private readonly apiUrl = `${getAppConfig().apiUrl}/providers`;
 
   getProviders(): Observable<Provider[]> {
     return this.http.get<Provider[]>(this.apiUrl);

@@ -5,6 +5,7 @@ import { NavigationEnd, Router } from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
 
 import { AuthService } from '../../core/services/auth.service';
+import { brandFullName, getAppConfig } from '../../core/config/app-config';
 
 const SECTION_TITLES: Record<string, string> = {
   dashboard: 'Panel de control',
@@ -29,6 +30,9 @@ function titleFor(url: string): string {
   styleUrl: './header.scss',
 })
 export class Header {
+  readonly brand = getAppConfig().brand;
+  readonly brandName = brandFullName();
+
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
