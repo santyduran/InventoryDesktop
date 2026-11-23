@@ -349,7 +349,7 @@
               max="100"
               step="0.01"
               [ngModel]="form.taxRate / 100"
-              (ngModelChange)="form.taxRate = $event * 100"
+              (ngModelChange)="form.taxRate = toBasisPoints($event)"
               [disabled]="saving"
             />
           </div>
@@ -401,7 +401,7 @@
           <button
             type="submit"
             class="primary-button"
-            [disabled]="saving || productForm.invalid"
+            [disabled]="saving"
           >
             {{ saving ? 'Guardando...' : 'Guardar producto' }}
           </button>

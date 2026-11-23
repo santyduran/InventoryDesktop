@@ -74,6 +74,11 @@ export class Products implements OnInit {
     });
   }
 
+  /** Convierte el porcentaje del formulario (19,5) a centésimas (1950). */
+  toBasisPoints(percent: number | null): number {
+    return Math.round((Number(percent) || 0) * 100);
+  }
+
   loadProducts(): void {
     this.loading = true;
     this.errorMessage = '';
@@ -177,6 +182,15 @@ export class Products implements OnInit {
     ) {
       this.errorMessage =
         'Los precios y las cantidades no pueden ser negativos.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    if (
+      this.form.taxType === 'GENERAL' &&
+      (this.form.taxRate < 0 || this.form.taxRate > 10000)
+    ) {
+      this.errorMessage = 'La tarifa de impuesto debe estar entre 0 y 100 %.';
       this.cdr.detectChanges();
       return;
     }

@@ -56,7 +56,7 @@
               autocomplete="username"
               required
               email
-              [disabled]="loading"
+              [disabled]="loading()"
             />
           </div>
         </div>
@@ -92,7 +92,7 @@
               placeholder="Ingresa tu contraseña"
               autocomplete="current-password"
               required
-              [disabled]="loading"
+              [disabled]="loading()"
             />
 
             <button
@@ -111,30 +111,30 @@
             type="checkbox"
             name="rememberUser"
             [(ngModel)]="rememberUser"
-            [disabled]="loading"
+            [disabled]="loading()"
           />
           <span>Recordar mi correo en este equipo</span>
         </label>
 
-        <div class="error-message" *ngIf="errorMessage">
+        <div class="error-message" *ngIf="errorMessage()">
           <span>!</span>
-          {{ errorMessage }}
+          {{ errorMessage() }}
         </div>
 
-        <div class="success-message" *ngIf="successMessage">
-          {{ successMessage }}
+        <div class="success-message" *ngIf="successMessage()">
+          {{ successMessage() }}
         </div>
 
         <button
           class="login-button"
           type="submit"
-          [disabled]="loading || loginForm.invalid"
+          [disabled]="loading()"
         >
-          <span *ngIf="!loading">Ingresar al sistema</span>
-          <span *ngIf="loading">Verificando credenciales...</span>
+          <span *ngIf="!loading()">Ingresar al sistema</span>
+          <span *ngIf="loading()">Verificando credenciales...</span>
 
           <svg
-            *ngIf="!loading"
+            *ngIf="!loading()"
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"
