@@ -26,7 +26,7 @@
       </div>
 
       <form
-        *ngIf="!completed"
+        *ngIf="!completed()"
         (ngSubmit)="onSubmit()"
         #setupForm="ngForm"
       >
@@ -47,7 +47,7 @@
               placeholder="Código entregado por quien instaló el sistema"
               autocomplete="off"
               required
-              [disabled]="loading"
+              [disabled]="loading()"
             />
           </div>
         </div>
@@ -81,7 +81,7 @@
               autocomplete="name"
               maxlength="100"
               required
-              [disabled]="loading"
+              [disabled]="loading()"
             />
           </div>
         </div>
@@ -119,7 +119,7 @@
               maxlength="50"
               required
               email
-              [disabled]="loading"
+              [disabled]="loading()"
             />
           </div>
         </div>
@@ -157,7 +157,7 @@
               minlength="12"
               maxlength="128"
               required
-              [disabled]="loading"
+              [disabled]="loading()"
             />
 
             <button
@@ -202,7 +202,7 @@
               placeholder="Repite tu contraseña"
               autocomplete="new-password"
               required
-              [disabled]="loading"
+              [disabled]="loading()"
             />
 
             <button
@@ -239,21 +239,21 @@
           </div>
         </div>
 
-        <div class="error-message" *ngIf="errorMessage">
+        <div class="error-message" *ngIf="errorMessage()">
           <span>!</span>
-          {{ errorMessage }}
+          {{ errorMessage() }}
         </div>
 
         <button
           class="setup-button"
           type="submit"
-          [disabled]="loading || setupForm.invalid"
+          [disabled]="loading()"
         >
-          <span *ngIf="!loading">Crear administrador</span>
-          <span *ngIf="loading">Creando cuenta...</span>
+          <span *ngIf="!loading()">Crear administrador</span>
+          <span *ngIf="loading()">Creando cuenta...</span>
 
           <svg
-            *ngIf="!loading"
+            *ngIf="!loading()"
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"
@@ -270,7 +270,7 @@
 
       </form>
 
-      <div class="setup-completed" *ngIf="completed">
+      <div class="setup-completed" *ngIf="completed()">
         <div class="completed-icon">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path
@@ -285,7 +285,7 @@
 
         <h3>¡Cuenta creada correctamente!</h3>
 
-        <p>{{ successMessage }}</p>
+        <p>{{ successMessage() }}</p>
 
         <a routerLink="/login" class="setup-button">
           Ir al inicio de sesión

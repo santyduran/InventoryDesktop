@@ -40,10 +40,12 @@ export class Setup implements OnInit {
   showPassword = false;
   showConfirmPassword = false;
 
-  loading = false;
-  errorMessage = '';
-  successMessage = '';
-  completed = false;
+  // Señales: las respuestas HTTP llegan fuera de la detección de cambios
+  // (la app no usa zone.js), así que la pantalla solo se actualiza con señales.
+  readonly loading = signal(false);
+  readonly errorMessage = signal('');
+  readonly successMessage = signal('');
+  readonly completed = signal(false);
 
   ngOnInit(): void {
     // Evita realizar peticiones HTTP durante el prerenderizado.
@@ -61,40 +63,54 @@ export class Setup implements OnInit {
         this.requiresSetupToken.set(!!status.requiresSetupToken);
       },
       error: () => {
-        this.errorMessage =
-          'No se pudo verificar el estado de configuración. Verifica que el backend esté activo.';
+        this.errorMessage.set('No se pudo verificar el estado de configuración. Verifica que el backend esté activo.');
       },
     });
   }
 
   onSubmit(): void {
-    this.errorMessage = '';
-    this.successMessage = '';
+    this.errorMessage.set('');
+    this.successMessage.set('');
 
     const fullName = this.fullName.trim();
     const username = this.username.trim().toLowerCase();
 
+    if (this.requiresSetupToken() && !this.setupToken.trim()) {
+      this.errorMessage.set('Escribe el código de instalación.');
+      return;
+    }
+
     if (!fullName || !username || !this.password || !this.confirmPassword) {
-      this.errorMessage = 'Completa todos los campos obligatorios.';
+      this.errorMessage.set('Completa todos los campos obligatorios.');
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(username)) {
+      this.errorMessage.set('El usuario debe ser un correo electrónico, por ejemplo nombre@correo.com.');
+      return;
+    }
+
+    if (username.length > 50) {
+      this.errorMessage.set('El correo no puede superar 50 caracteres.');
       return;
     }
 
     if (this.password.length < 12) {
-      this.errorMessage = 'La contraseña debe tener mínimo 12 caracteres.';
+      this.errorMessage.set('La contraseña debe tener mínimo 12 caracteres.');
       return;
     }
 
     if (this.password.length > 128) {
-      this.errorMessage = 'La contraseña no puede superar 128 caracteres.';
+      this.errorMessage.set('La contraseña no puede superar 128 caracteres.');
       return;
     }
 
     if (this.password !== this.confirmPassword) {
-      this.errorMessage = 'Las contraseñas no coinciden.';
+      this.errorMessage.set('Las contraseñas no coinciden.');
       return;
     }
 
-    this.loading = true;
+    this.loading.set(true);
 
     this.authService.setupAdmin({
       fullName,
@@ -103,31 +119,28 @@ export class Setup implements OnInit {
       setupToken: this.setupToken,
     }).subscribe({
       next: (response) => {
-        this.loading = false;
-        this.completed = true;
-        this.successMessage = response.message;
+        this.loading.set(false);
+        this.completed.set(true);
+        this.successMessage.set(response.message);
         this.password = '';
         this.confirmPassword = '';
       },
       error: (error) => {
-        this.loading = false;
+        this.loading.set(false);
 
         if (error.status === 409) {
-          this.errorMessage =
-            'La configuración inicial ya fue realizada. Inicia sesión.';
+          this.errorMessage.set('La configuración inicial ya fue realizada. Inicia sesión.');
         } else if (error.status === 400) {
           const message = error.error?.message;
 
-          this.errorMessage = Array.isArray(message)
+          this.errorMessage.set(Array.isArray(message)
             ? message.join(' ')
-            : message || 'Verifica los datos ingresados.';
+            : message || 'Verifica los datos ingresados.');
         } else if (error.status === 0) {
-          this.errorMessage =
-            'No se pudo conectar con el servidor. Verifica que el backend esté activo.';
+          this.errorMessage.set('No se pudo conectar con el servidor. Verifica que el backend esté activo.');
         } else {
-          this.errorMessage =
-            error.error?.message ||
-            'Ocurrió un error al crear el administrador.';
+          this.errorMessage.set(error.error?.message ||
+            'Ocurrió un error al crear el administrador.');
         }
       },
     });

@@ -1,6 +1,6 @@
 
 import { isPlatformBrowser } from '@angular/common';
-import { Component, inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { Component, inject, OnInit, PLATFORM_ID, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -31,9 +31,11 @@ export class Login implements OnInit {
   password = '';
   showPassword = false;
   rememberUser = false;
-  loading = false;
-  errorMessage = '';
-  successMessage = '';
+  // Señales: las respuestas HTTP llegan fuera de la detección de cambios
+  // (la app no usa zone.js), así que la pantalla solo se actualiza con señales.
+  readonly loading = signal(false);
+  readonly errorMessage = signal('');
+  readonly successMessage = signal('');
 
   ngOnInit(): void {
     // La consulta solo debe ejecutarse en el navegador.
@@ -42,7 +44,7 @@ export class Login implements OnInit {
     }
 
     if (this.route.snapshot.queryParamMap.get('reason') === 'session-expired') {
-      this.errorMessage = 'Tu sesión terminó. Vuelve a iniciar sesión.';
+      this.errorMessage.set('Tu sesión terminó. Vuelve a iniciar sesión.');
     }
 
     const rememberedUsername = this.readRememberedUsername();
@@ -66,36 +68,34 @@ export class Login implements OnInit {
   }
 
   onSubmit(): void {
-    this.errorMessage = '';
-    this.successMessage = '';
+    this.errorMessage.set('');
+    this.successMessage.set('');
 
     const username = this.username.trim().toLowerCase();
     const password = this.password;
 
     if (!username || !password) {
-      this.errorMessage = 'Ingresa tu correo y contraseña.';
+      this.errorMessage.set('Ingresa tu correo y contraseña.');
       return;
     }
 
-    this.loading = true;
+    this.loading.set(true);
 
     this.authService.login(username, password).subscribe({
       next: () => {
-        this.loading = false;
+        this.loading.set(false);
         this.saveRememberedUsername(username);
         this.router.navigate(['/dashboard']);
       },
       error: (error) => {
-        this.loading = false;
+        this.loading.set(false);
 
         if (error.status === 401) {
-          this.errorMessage = 'Correo o contraseña incorrectos.';
+          this.errorMessage.set('Correo o contraseña incorrectos.');
         } else if (error.status === 0) {
-          this.errorMessage =
-            'No se pudo conectar con el servidor. Verifica que el backend esté activo.';
+          this.errorMessage.set('No se pudo conectar con el servidor. Verifica que el backend esté activo.');
         } else {
-          this.errorMessage =
-            error.error?.message || 'Ocurrió un error al iniciar sesión.';
+          this.errorMessage.set(error.error?.message || 'Ocurrió un error al iniciar sesión.');
         }
       },
     });

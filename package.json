@@ -10,7 +10,7 @@
     "frontend:dev": "npm --prefix frontend run start -- --host 127.0.0.1",
     "electron:dev": "wait-on http://127.0.0.1:4200 http://127.0.0.1:3000 && electron .",
     "dev": "concurrently -k -r \"npm:backend:dev\" \"npm:frontend:dev\" \"npm:electron:dev\"",
-    "build:win": "electron-builder --win nsis",
+    "build:win": "node scripts/build-win.mjs",
     "pack:win": "electron-builder --dir --win"
   },
   "keywords": [
@@ -77,6 +77,9 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "InventoryDesktop"
+    },
+    "toolsets": {
+      "nsis": "1.2.1"
     }
   }
 }

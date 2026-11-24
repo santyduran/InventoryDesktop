@@ -128,6 +128,12 @@ export class Users implements OnInit {
       return;
     }
 
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(username)) {
+      this.errorMessage =
+        'El usuario debe ser un correo electrónico, por ejemplo nombre@correo.com.';
+      return;
+    }
+
     if (!this.editingId && !password.trim()) {
       this.errorMessage = 'La contraseña es obligatoria para crear el usuario.';
       return;
